@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1029918832957",
+    "project_id": "tallerucc-51203",
+    "storage_bucket": "tallerucc-51203.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1029918832957:android:bbed3f5e52aaffddf22d54",
+        "android_client_info": {
+          "package_name": "com.example.tallerucc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcLi5L7fRLsz2PktjU8KmdyCe6hs8mi2o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
