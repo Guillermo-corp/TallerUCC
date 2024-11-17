@@ -99,6 +99,25 @@ class AuthViewModel : ViewModel() {
         _authState.value = AuthState.Unauthenticated
     }
 
+    fun forgotPassword(email: String) {
+        // Check if the email is empty
+        if (email.isEmpty()) {
+            _authState.value = AuthState.Error("Email can't be empty")
+            return
+        }
+        _authState.value = AuthState.Loading
+
+        // Call Firebase's sendPasswordResetEmail function
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _authState.value = AuthState.Error("Password reset email sent")
+                } else {
+                    _authState.value = AuthState.Error(task.exception?.message ?: "Unknown error")
+                }
+            }
+    }
+
 }
 
 sealed class AuthState {

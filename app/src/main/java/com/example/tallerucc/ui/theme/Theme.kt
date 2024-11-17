@@ -33,6 +33,13 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+private val LightUCCScheme = lightColorScheme(
+    primary = DarkBlue,
+    secondary = LightBlue,
+    tertiary = DarkGrey,
+    background = White
+)
+
 @Composable
 fun TallerUCCTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -47,7 +54,7 @@ fun TallerUCCTheme(
         }
 
         darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else -> LightUCCScheme
     }
 
     MaterialTheme(
