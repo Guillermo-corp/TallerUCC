@@ -1,10 +1,16 @@
 package com.example.tallerucc.viewModel
 
+import android.util.Log
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AuthViewModel : ViewModel() {
 
@@ -42,57 +48,96 @@ class AuthViewModel : ViewModel() {
     }
 
     fun login(email: String, password: String) {
-
         if (email.isEmpty() || password.isEmpty()) {
-            _authState.value = AuthState.Error("Email and password can't be empty")
+            val errorMessage = "Email and password can't be empty"
+            Log.e("AuthViewModel", errorMessage)
+            _authState.value = AuthState.Error(errorMessage)
             return
         }
 
         _authState.value = AuthState.Loading
+        Log.d("AuthViewModel", "Login initiated for email: $email")
+
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    _authState.value = AuthState.Authenticated
+                    if (auth.currentUser?.isEmailVerified == true) {
+                        Log.d("AuthViewModel", "Login successful for email: $email")
+                        _authState.value = AuthState.Authenticated
+                    } else {
+                        val errorMessage = "Please verify your email before logging in."
+                        Log.e("AuthViewModel", errorMessage)
+                        _authState.value = AuthState.Error(errorMessage)
+                    }
                 } else {
-                    _authState.value = AuthState.Error(task.exception?.message ?: "Unknown error")
+                    val errorMessage = handleAuthError(task.exception) // Centralización de errores
+                    Log.e("AuthViewModel", "Login failed: $errorMessage", task.exception) // Log error
+                    _authState.value = AuthState.Error(errorMessage)
                 }
             }
-
     }
 
-    fun signup(email: String, password: String) {
 
+
+    fun signup(email: String, password: String) {
         if (email.isEmpty() || password.isEmpty()) {
-            _authState.value = AuthState.Error("Email and password can't be empty")
+            val errorMessage = "Email and password can't be empty"
+            Log.e("AuthViewModel", errorMessage)
+            _authState.value = AuthState.Error(errorMessage)
             return
         }
 
         _authState.value = AuthState.Loading
+        Log.d("AuthViewModel", "Signup initiated for email: $email")
 
-        //Set the language before creating the user
+        // Set the language before creating the user
         auth.setLanguageCode("es")
 
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    //Send verification email
+                    val userId = task.result?.user?.uid ?: return@addOnCompleteListener
+                    Log.d("AuthViewModel", "Signup successful for email: $email")
+
+                    // Send verification email
                     auth.currentUser?.sendEmailVerification()
                         ?.addOnCompleteListener { verificationTask ->
                             if (verificationTask.isSuccessful) {
-                                _authState.value = AuthState.VerificationPending
-                            } else {
-                                _authState.value = AuthState.Error(
-                                    verificationTask.exception?.message
-                                        ?: "Verification email failed"
+                                Log.d("AuthViewModel", "Verification email sent to $email")
+
+                                // Create user document in Firestore
+                                val userData = mapOf(
+                                    "email" to email,
+                                    "roles" to listOf("usuario") // Default role
                                 )
+
+                                FirebaseFirestore.getInstance()
+                                    .collection("users")
+                                    .document(userId)
+                                    .set(userData)
+                                    .addOnSuccessListener {
+                                        Log.d("AuthViewModel", "User document created in Firestore for $email")
+                                        _authState.value = AuthState.VerificationPending
+                                    }
+                                    .addOnFailureListener { e ->
+                                        val errorMessage = "User registered but failed to create Firestore document: ${e.message}"
+                                        Log.e("AuthViewModel", errorMessage, e)
+                                        _authState.value = AuthState.Error(errorMessage)
+                                    }
+                            } else {
+                                val errorMessage = handleAuthError(verificationTask.exception)
+                                Log.e("AuthViewModel", "Failed to send verification email: $errorMessage", verificationTask.exception)
+                                _authState.value = AuthState.Error(errorMessage)
                             }
                         }
                 } else {
-                    _authState.value = AuthState.Error(task.exception?.message ?: "Unknown error")
+                    val errorMessage = handleAuthError(task.exception) // Centralización de errores
+                    Log.e("AuthViewModel", "Signup failed: $errorMessage", task.exception) // Log error
+                    _authState.value = AuthState.Error(errorMessage)
                 }
             }
-
     }
+
 
     fun signout() {
         auth.signOut()
@@ -126,4 +171,11 @@ sealed class AuthState {
     object VerificationPending : AuthState()
     object Loading : AuthState()
     data class Error(val message: String) : AuthState()
+}
+
+private fun handleAuthError(exception: Exception?): String {
+    return when (exception) {
+        is FirebaseAuthInvalidUserException -> "No account found with this email."
+        else -> exception?.message ?: "An unknown error occurred."
+    }
 }

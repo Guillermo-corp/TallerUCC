@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,15 +22,28 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.focus.focusTarget
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.tallerucc.R
+import com.example.tallerucc.ui.theme.Black
 import com.example.tallerucc.ui.theme.DarkBlue
 import com.example.tallerucc.ui.theme.DarkGrey
 import com.example.tallerucc.ui.theme.LightBlue
@@ -38,6 +52,7 @@ import com.example.tallerucc.ui.theme.Poppins
 import com.example.tallerucc.ui.theme.Typography
 import com.example.tallerucc.ui.theme.White
 import com.example.tallerucc.viewModel.AuthState
+import com.example.tallerucc.viewModel.AuthViewModel
 
 @Composable
 fun TopSection(
@@ -87,7 +102,7 @@ fun TopSection(
 @Composable
 fun BottomSection(
     modifier: Modifier = Modifier,
-    navController: NavController.Companion,
+    navController: NavController,
     //val
     email: String, // Add email parameter
     onEmailChanged: (String) -> Unit, // Add onEmailChanged callback
@@ -114,6 +129,9 @@ fun BottomSection(
     showRegisterOption: Boolean = true, // Add showRegisterOption parameter
     showGoogleLoginButton: Boolean = true // Add showGoogleLoginButton parameter
 ) {
+
+    val focusManager = LocalFocusManager.current
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -139,7 +157,17 @@ fun BottomSection(
             OutlinedTextField(
                 value = email,
                 onValueChange = onEmailChanged,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusable()
+                    .onKeyEvent {
+                        if (it.key == Key.Enter && it.type == KeyEventType.KeyDown) {
+                            focusManager.moveFocus(FocusDirection.Next)
+                            true // Consume the event
+                        } else {
+                            false // Don't consume the event
+                        }
+                    },
                 shape = RoundedCornerShape(8.dp),
                 colors = OutlinedTextFieldDefaults
                     .colors(
@@ -166,7 +194,16 @@ fun BottomSection(
                 onValueChange = onPasswordChanged,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 8.dp)
+                    .focusable()
+                    .onKeyEvent {
+                        if (it.key == Key.Enter && it.type == KeyEventType.KeyDown) {
+                            focusManager.moveFocus(FocusDirection.Next)
+                            true // Consume the event
+                        } else {
+                            false // Don't consume the event
+                        }
+                    },
                 shape = RoundedCornerShape(8.dp),
                 colors = OutlinedTextFieldDefaults
                     .colors(
@@ -279,8 +316,8 @@ fun BottomSection(
 }
 
 
-/*
-@Preview
+
+/*@Preview
 @Composable
 fun TopSectionPreview(
     modifier: Modifier = Modifier
@@ -303,23 +340,31 @@ fun TopSectionPreview(
             "Bienvenido",
             "Escribe tu email y contraseña para poder continuar"
         )
+        val authViewModel = AuthViewModel()
+        val authState = authViewModel.authState.observeAsState()
         BottomSection(
             modifier = Modifier,
             navController = NavController,
             "Email",
-            "Password",
+            {""},
             "Iniciar",
-            authState = authViewModel.authState.observeAsState(),
-            {},
-            {},
-            {},
-            {},
-            true,
-            true,
-            true,
-            true,
-            true,
-            false)
+            onPasswordChanged = {},
+            labelEmailText = "Email",
+            labelPasswordText = "Contraseña",
+            buttonLoginText = "Iniciar",
+
+            authState = authState,
+            onLoginClick = {},
+            onForgotPasswordClick = {},
+            onRegisterClick = {},
+            onGoogleLoginClick = {},
+            showEmailField = true,
+            showPasswordField = true,
+            showForgotPassword = true,
+            showLoginButton = true,
+            showRegisterOption = true,
+            showGoogleLoginButton = true
+        )
     }
 
 }*/

@@ -5,6 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,7 +18,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.tallerucc.pages.composables.BottomSection
 import com.example.tallerucc.pages.composables.TopSection
@@ -70,9 +75,12 @@ fun SignupPage(
             "Registrate",
             "Escribe tu email y contraseña"
         )
+
+
+
         BottomSection(
             modifier = Modifier,
-            navController = NavController,
+            navController = navController,
 
             //values
             email = email,
@@ -82,7 +90,7 @@ fun SignupPage(
 
             //Text
             labelEmailText = "Email",
-            labelPasswordText = "Password",
+            labelPasswordText = "Contraseña",
             buttonLoginText = "Registrarse",
 
             //Click Events
@@ -100,5 +108,18 @@ fun SignupPage(
             showRegisterOption = false,
             showGoogleLoginButton = false
         )
+
+        if (authState.value is AuthState.Loading) {
+            CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+        }
+
+        if (authState.value is AuthState.Error) {
+            Text(
+                text = (authState.value as AuthState.Error).message,
+                color = Color.Red,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+
     }
 }

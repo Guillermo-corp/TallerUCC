@@ -26,7 +26,7 @@ import com.example.tallerucc.viewModel.AuthViewModel
 import com.example.tallerucc.viewModel.NavigationViewModel
 
 @Composable
-fun HomePage(
+fun NotificationPage(
     modifier: Modifier = Modifier,
     navController: NavController,
     authViewModel: AuthViewModel,
@@ -65,7 +65,7 @@ fun HomePage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Home Page",
+                text = "Notifications Page",
                 style = Typography.titleLarge,
                 fontSize = 32.sp
             )
@@ -83,3 +83,4 @@ fun HomePage(
     }
 
 }
+
