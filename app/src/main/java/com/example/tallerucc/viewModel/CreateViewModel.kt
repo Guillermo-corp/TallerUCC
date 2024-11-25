@@ -41,14 +41,14 @@ class CreateViewModel : ViewModel() {
     fun createWorkshop(
         name: String,
         description: String,
-        imageUrl: String,
+        imageUrls: List<String>,
         categoryReference: DocumentReference,
         schedule: List<Map<String, Any>>
     ) {
         val workshop = mapOf(
             "name" to name,
             "description" to description,
-            "imageUrl" to imageUrl,
+            "imageUrls" to imageUrls, // Guarda el array de URLs
             "categoryId" to categoryReference,
             "schedule" to schedule,
             "createdAt" to Timestamp.now()
@@ -57,6 +57,7 @@ class CreateViewModel : ViewModel() {
             .addOnSuccessListener { Log.d("CreatePage", "Workshop created successfully!") }
             .addOnFailureListener { e -> Log.e("CreatePage", "Error creating workshop", e) }
     }
+
 
 
 

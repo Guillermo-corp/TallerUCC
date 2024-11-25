@@ -80,6 +80,8 @@ dependencies {
     implementation (libs.coil.kt.coil.compose) // Para cargar imágenes en Jetpack Compose
 
 
+
+
     //Firebase Auth
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)

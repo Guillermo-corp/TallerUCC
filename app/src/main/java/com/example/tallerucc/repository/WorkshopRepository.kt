@@ -51,20 +51,26 @@ class WorkshopRepository {
             println("Workshops fetched: ${snapshot.documents.size}") // Log del tamaño
 
             snapshot.documents.map { document ->
+                val imageUrls = document["imageUrls"] as? List<String>
+                    ?: emptyList() // Nuevo campo para múltiples imágenes
+                val firstImageUrl =
+                    imageUrls.firstOrNull() ?: "" // Usa la primera imagen como vista previa
+
                 Workshop(
                     id = document.id,
                     name = document.getString("name") ?: "",
                     description = document.getString("description") ?: "",
                     categoryId = document.getDocumentReference("categoryId"),
-                    imageUrl = document.getString("imageUrl") ?: "",
+                    imageUrl = firstImageUrl, // Primera imagen para vistas previas
+                    imageUrls = imageUrls, // Lista completa de imágenes
                     schedule = (document["schedule"] as? List<Map<String, Any>>)?.map {
                         Schedule(
                             day = it["day"] as? String ?: "",
                             startTime = (it["startTime"] as? Number)?.toLong()?.let { time ->
-                                formatTimeFromLong(time) // Formateo opcional
+                                formatTimeFromLong(time)
                             } ?: "",
                             endTime = (it["endTime"] as? Number)?.toLong()?.let { time ->
-                                formatTimeFromLong(time) // Formateo opcional
+                                formatTimeFromLong(time)
                             } ?: ""
                         )
                     } ?: emptyList()
@@ -81,12 +87,15 @@ class WorkshopRepository {
         return try {
             val document = workshopReference.get().await()
             if (document.exists()) {
+                val imageUrls = document["imageUrls"] as? List<String>
+                    ?: emptyList() // Obtener lista de imágenes
                 Workshop(
                     id = document.id,
                     name = document.getString("name") ?: "",
                     description = document.getString("description") ?: "",
-                    categoryId = document.getDocumentReference("categoryId"), // Usamos DocumentReference
-                    imageUrl = document.getString("imageUrl") ?: "",
+                    categoryId = document.getDocumentReference("categoryId"),
+                    imageUrl = imageUrls.firstOrNull() ?: "", // Primera imagen como vista previa
+                    imageUrls = imageUrls, // Lista completa de imágenes
                     schedule = (document["schedule"] as? List<Map<String, Any>>)?.map {
                         Schedule(
                             day = it["day"] as? String ?: "",
@@ -107,7 +116,7 @@ class WorkshopRepository {
     }
 }
 
-fun formatTimeFromLong(time: Long): String {
+    fun formatTimeFromLong(time: Long): String {
     val hours = time / 3600000 // Extrae horas
     val minutes = (time % 3600000) / 60000 // Extrae minutos
     return String.format(Locale.getDefault(),"%02d:%02d", hours, minutes) // Formato HH:mm

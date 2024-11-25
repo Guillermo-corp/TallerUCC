@@ -19,7 +19,8 @@ data class Workshop(
     val name: String = "",
     val description: String = "",
     val categoryId: DocumentReference? = null, // Cambiado a DocumentReference
-    val imageUrl: String = "", // URL de la imagen del taller (opcional)
+    val imageUrl: String = "",
+    val imageUrls: List<String> = emptyList(), // Nuevo campo para múltiples imágenes
     val schedule: List<Schedule> = emptyList() // Horarios del taller
 )
 

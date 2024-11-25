@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.example.tallerucc.ui.theme.Typography
 import java.util.Locale
 
 @Composable
@@ -19,7 +20,10 @@ fun TimePickerButton(
     var showDialog by remember { mutableStateOf(false) }
 
     Button(onClick = { showDialog = true }) {
-        Text(text = selectedTime?.let { formatTime(it) } ?: text)
+        Text(
+            text = selectedTime?.let { formatTime(it) } ?: text,
+            style = Typography.bodyMedium
+        )
     }
 
     if (showDialog) {

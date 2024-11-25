@@ -1,5 +1,6 @@
 package com.example.tallerucc.pages.composables
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -40,16 +41,34 @@ fun WorkshopItem(
 //            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Imagen del workshop
-            AsyncImage(
-                model = workshop.imageUrl, // URL de la imagen
-                contentDescription = "Imagen del workshop",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)),
+            if (workshop.imageUrls.isNotEmpty()) {
+                AsyncImage(
+                    model = workshop.imageUrls[0], // URL de la imagen
+                    contentDescription = "Imagen del workshop",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)),
 //                alignment = Alignment.Center
-            )
+                )
+            } else {
+                // Mostrar imagen de marcador de posición si no hay imágenes
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Sin Imagen",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            }
+
 
             // Nombre del workshop
             Text(

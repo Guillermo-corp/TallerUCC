@@ -1,5 +1,7 @@
 package com.example.tallerucc.viewModel
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tallerucc.model.Category
@@ -9,6 +11,8 @@ import com.google.firebase.firestore.DocumentReference
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.YearMonth
 
 class WorkshopViewModel(private val repository: WorkshopRepository) : ViewModel() {
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
@@ -44,6 +48,7 @@ class WorkshopViewModel(private val repository: WorkshopRepository) : ViewModel(
             _workshopDetails.value = workshop
         }
     }
+
 
 }
 
