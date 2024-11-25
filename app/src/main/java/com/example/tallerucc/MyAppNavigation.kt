@@ -17,6 +17,7 @@ import com.example.tallerucc.pages.workshops.WorkshopDetailPage
 import com.example.tallerucc.pages.workshops.WorkshopsByCategoryPage
 import com.example.tallerucc.pages.workshops.WorkshopsCategoriesPage
 import com.example.tallerucc.viewModel.AuthViewModel
+import com.example.tallerucc.viewModel.CreateViewModel
 import com.example.tallerucc.viewModel.NavigationViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -58,6 +59,12 @@ fun MyAppNavigation(
             WorkshopsCategoriesPage(
                 navController = navController,
                 navigationViewModel = navigationViewModel
+            )
+        }
+        composable("createPage") {
+            CreatePage(
+                navController = navController,
+                createViewModel = CreateViewModel()
             )
         }
         composable("workshops/{categoryId}") { backStackEntry ->

@@ -4,13 +4,14 @@ import com.google.firebase.firestore.DocumentReference
 
 data class Category(
     val id: String = "", // ID único de la categoría
-    val name: String = "" // Nombre de la categoría
+    val name: String = "", // Nombre de la categoría
+    val reference: DocumentReference
 )
 
 data class Schedule(
     val day: String = "",
-    val startTime: String = "",
-    val endTime: String = ""
+    val startTime: String,
+    val endTime: String
 )
 
 data class Workshop(

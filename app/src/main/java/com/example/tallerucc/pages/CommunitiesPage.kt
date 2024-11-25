@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.tallerucc.navigation.navItems
 import com.example.tallerucc.pages.composables.BottomNavBar
+import com.example.tallerucc.pages.composables.FloatingActionButtonCustom
 import com.example.tallerucc.pages.composables.Header
 import com.example.tallerucc.ui.theme.Typography
 import com.example.tallerucc.viewModel.AuthState
@@ -53,6 +54,14 @@ fun CommunitiesPage(
                 navItems = navItems,
                 selectedIndex = selectedIndex,
                 onItemSelected = { navigationViewModel.selectIndex(it) }
+            )
+        },
+        floatingActionButton = {
+            //FAB personalizado
+            FloatingActionButtonCustom(
+                onFabClick = {
+                    navController.navigate("createPage")
+                }
             )
         }
     ) { innerPadding ->

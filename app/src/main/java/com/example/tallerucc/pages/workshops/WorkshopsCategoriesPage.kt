@@ -6,6 +6,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +27,7 @@ import com.example.tallerucc.navigation.navItems
 import com.example.tallerucc.pages.composables.BottomNavBar
 import com.example.tallerucc.pages.composables.Header
 import com.example.tallerucc.pages.composables.CategoryItem
+import com.example.tallerucc.pages.composables.FloatingActionButtonCustom
 import com.example.tallerucc.repository.WorkshopRepository
 import com.example.tallerucc.viewModel.WorkshopViewModelFactory
 
@@ -52,6 +58,14 @@ fun WorkshopsCategoriesPage(
                 navItems = navItems,
                 selectedIndex = selectedIndex,
                 onItemSelected = { navigationViewModel.selectIndex(it) }
+            )
+        },
+        floatingActionButton = {
+            //FAB personalizado
+            FloatingActionButtonCustom(
+                onFabClick = {
+                    navController.navigate("createPage")
+                }
             )
         }
     ) { innerPadding ->

@@ -22,9 +22,9 @@ class MainActivity : ComponentActivity() {
         val authViewModel: AuthViewModel by viewModels()
         setContent {
             TallerUCCTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MyAppNavigation(modifier = Modifier.padding(innerPadding),authViewModel = authViewModel)
-                }
+
+                    MyAppNavigation(modifier = Modifier.padding(),authViewModel = authViewModel)
+
             }
         }
     }
