@@ -10,8 +10,15 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.example.tallerucc.ui.theme.DarkBlue
+import com.example.tallerucc.ui.theme.LightBlue
+import com.example.tallerucc.ui.theme.LightGrey
 import com.example.tallerucc.ui.theme.Typography
+import com.example.tallerucc.ui.theme.White
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,7 +35,7 @@ fun Header(
             Text(
                 text = title,
                 style = Typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = DarkBlue
             )
         },
         navigationIcon = {
@@ -37,7 +44,7 @@ fun Header(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Flecha hacia atrás
                         contentDescription = "Back Icon",
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        tint = LightBlue
                     )
                 }
             }
@@ -48,16 +55,27 @@ fun Header(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ExitToApp, // Ícono de logout
                         contentDescription = "Logout Icon",
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        tint = LightBlue
                     )
                 }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = Color.White
+            containerColor = Color.Transparent,
+            titleContentColor = DarkBlue
         ),
         modifier = Modifier
+            .drawBehind {
+                // Draw bottom border
+                val strokeWidth = 1.dp.toPx()
+                val y = size.height - strokeWidth / 2
+                drawLine(
+                    color = LightGrey, // Color of the border
+                    start = Offset(0f, y),
+                    end = Offset(size.width, y),
+                    strokeWidth = strokeWidth
+                )
+            }
     )
 }
 

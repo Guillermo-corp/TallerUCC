@@ -1,5 +1,6 @@
 package com.example.tallerucc.pages.workshops
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +19,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,10 +40,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.tallerucc.R
 import com.example.tallerucc.navigation.navItems
 import com.example.tallerucc.pages.composables.BottomNavBar
 import com.example.tallerucc.pages.composables.Header
@@ -53,6 +63,7 @@ import com.example.tallerucc.viewModel.NavigationViewModel
 import com.example.tallerucc.viewModel.NotificationViewModel
 import com.example.tallerucc.viewModel.WorkshopViewModel
 import com.example.tallerucc.viewModel.WorkshopViewModelFactory
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 
 
@@ -69,6 +80,10 @@ fun WorkshopDetailPage(
     val viewModel: WorkshopViewModel = viewModel(factory = WorkshopViewModelFactory(repository))
     val workshop by viewModel.workshopDetails.collectAsState()
     val selectedIndex by navigationViewModel.selectedIndex.collectAsState()
+
+    val workshopViewModel: WorkshopViewModel = viewModel(factory = WorkshopViewModelFactory(WorkshopRepository()))
+    val context = LocalContext.current // Obtener el contexto
+
 
     LaunchedEffect(workshopReference) {
         viewModel.loadWorkshopDetails(workshopReference)
@@ -117,7 +132,10 @@ fun WorkshopDetailPage(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(330.dp)
-                            .shadow(elevation = 8.dp, shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)) // Sombra para el carrusel
+                            .shadow(
+                                elevation = 8.dp,
+                                shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+                            ) // Sombra para el carrusel
                             .clip(
                                 RoundedCornerShape(
                                     bottomStart = 16.dp,
@@ -203,30 +221,111 @@ fun WorkshopDetailPage(
                 // Nombre del workshop
                 Text(
                     text = workshop!!.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    style = Typography.titleLarge,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = DarkBlue
                 )
 
                 // Descripción del workshop
                 Text(
                     text = workshop!!.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    style = Typography.bodyLarge,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = DarkGrey
                 )
 
-                // Horarios del workshop
-                Text(
-                    text = "Horario:",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                HorizontalDivider(
+                    modifier = Modifier
+                        .padding(8.dp),
+                    thickness = 1.dp,
+                    color = LightBlue.copy(alpha = 0.2f)
                 )
-                workshop!!.schedule.forEach { schedule ->
-                    Text(
-                        text = "${schedule.day}: ${schedule.startTime} - ${schedule.endTime}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+
+//                // Horarios del workshop
+//                Text(
+//                    text = "Horario:",
+//                    style = Typography.titleMedium,
+//                    modifier = Modifier.padding(horizontal = 16.dp),
+//                    color = DarkBlue
+//                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 72.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Ícono alineado a la izquierda
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = "Info Icon",
+                        modifier = Modifier.size(32.dp),
+                        tint = LightBlue
+                    )
+
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_time),
+                        contentDescription = "Custom Drawable Icon",
+                        modifier = Modifier.size(32.dp),
+                        tint = LightBlue
                     )
                 }
+
+
+                workshop!!.schedule.forEach { schedule ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 40.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // Día alineado a la izquierda
+                        Text(
+                            text = schedule.day,
+                            style = Typography.titleSmall,
+                            color = LightBlue
+                        )
+
+                        // Hora alineada a la derecha
+                        Text(
+                            text = "${schedule.startTime} - ${schedule.endTime}",
+                            style = Typography.titleSmall,
+                            color = DarkGrey
+                        )
+                    }
+                }
+
+                Button(
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    onClick = {
+                        val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email
+                        val workshopName = workshop?.name // Asegúrate de tener acceso al nombre del workshop
+
+                        if (currentUserEmail != null && workshopName != null) {
+                            workshopViewModel.joinCommunityByWorkshop(
+                                workshopName = workshopName,
+                                userEmail = currentUserEmail,
+                                onSuccess = {
+                                    Toast.makeText(context, "Te has unido a la comunidad.", Toast.LENGTH_SHORT).show()
+                                },
+                                onFailure = { error ->
+                                    Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        }
+                    }
+                ) {
+                    Text(
+                        text = "Unirse",
+                        style = Typography.titleMedium,
+                        color = White
+                    )
+                }
+
+
 
 
             }

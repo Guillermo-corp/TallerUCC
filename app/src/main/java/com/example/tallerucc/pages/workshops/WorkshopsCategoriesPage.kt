@@ -4,13 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,19 +16,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.tallerucc.viewModel.NavigationViewModel
-import com.example.tallerucc.viewModel.WorkshopViewModel
 import androidx.navigation.NavController
+import com.example.tallerucc.R
 import com.example.tallerucc.navigation.navItems
 import com.example.tallerucc.pages.composables.BottomNavBar
-import com.example.tallerucc.pages.composables.Header
 import com.example.tallerucc.pages.composables.CategoryItem
 import com.example.tallerucc.pages.composables.FloatingActionButtonCustom
+import com.example.tallerucc.pages.composables.Header
+import com.example.tallerucc.pages.composables.categoryIcons
 import com.example.tallerucc.repository.WorkshopRepository
 import com.example.tallerucc.viewModel.AuthViewModel
+import com.example.tallerucc.viewModel.NavigationViewModel
 import com.example.tallerucc.viewModel.NotificationViewModel
+import com.example.tallerucc.viewModel.WorkshopViewModel
 import com.example.tallerucc.viewModel.WorkshopViewModelFactory
-
 
 @Composable
 fun WorkshopsCategoriesPage(
@@ -77,7 +74,7 @@ fun WorkshopsCategoriesPage(
             )
         },
         floatingActionButton = {
-            //FAB personalizado
+            // FAB personalizado
             FloatingActionButtonCustom(
                 onFabClick = {
                     navController.navigate("createPage")
@@ -93,12 +90,17 @@ fun WorkshopsCategoriesPage(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2), // 2 columnas
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxSize()
             ) {
                 items(categories) { category ->
+                    val iconRes = categoryIcons[category.name] ?: R.drawable.logo2_blanco_ch // Ícono predeterminado
                     CategoryItem(
                         categoryName = category.name,
+                        iconRes = iconRes, // Pasar el recurso drawable
                         onClick = {
                             navController.navigate("workshops/${category.id}")
                         }
@@ -108,3 +110,4 @@ fun WorkshopsCategoriesPage(
         }
     }
 }
+
