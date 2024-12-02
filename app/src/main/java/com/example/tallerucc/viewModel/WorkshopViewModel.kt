@@ -79,10 +79,11 @@ class WorkshopViewModel(private val repository: WorkshopRepository) : ViewModel(
                     currentUser?.let { user ->
                         val userDoc = db.collection("users").document(user.uid).get().await()
                         val followedCommunities = userDoc.get("followedCommunities") as? List<String> ?: emptyList()
+                        val registeredWorkshops = userDoc.get("registeredWorkshops") as? List<String> ?: emptyList()
 
-                        if (followedCommunities.contains(workshopName)) {
-                            // Si ya sigue la comunidad, no hacer nada
-                            Log.d("WorkshopViewModel", "El usuario ya sigue la comunidad: $workshopName")
+                        if (followedCommunities.contains(workshopName) && registeredWorkshops.contains(workshopName)) {
+                            // Si ya sigue la comunidad y está registrado en el workshop, no hacer nada
+                            Log.d("WorkshopViewModel", "El usuario ya sigue la comunidad y está registrado en el workshop: $workshopName")
                             return@launch onSuccess() // Puedes manejar esto según el caso
                         }
 
@@ -100,6 +101,13 @@ class WorkshopViewModel(private val repository: WorkshopRepository) : ViewModel(
                         db.collection("users").document(user.uid)
                             .update("followedCommunities", FieldValue.arrayUnion(workshopName))
                             .await()
+
+                        if (!registeredWorkshops.contains(workshopName)) {
+                            // Agregar el workshop al campo "registeredWorkshops" del usuario
+                            db.collection("users").document(user.uid)
+                                .update("registeredWorkshops", FieldValue.arrayUnion(workshopName))
+                                .await()
+                        }
 
                         // Registrar log
                         Log.d("WorkshopViewModel", "El usuario se unió a la comunidad: $workshopName")
