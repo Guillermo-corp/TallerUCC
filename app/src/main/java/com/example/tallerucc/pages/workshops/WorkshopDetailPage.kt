@@ -48,6 +48,7 @@ import com.example.tallerucc.ui.theme.LightBlue
 import com.example.tallerucc.ui.theme.LightGrey
 import com.example.tallerucc.ui.theme.Typography
 import com.example.tallerucc.ui.theme.White
+import com.example.tallerucc.viewModel.AuthViewModel
 import com.example.tallerucc.viewModel.NavigationViewModel
 import com.example.tallerucc.viewModel.WorkshopViewModel
 import com.example.tallerucc.viewModel.WorkshopViewModelFactory
@@ -60,6 +61,7 @@ fun WorkshopDetailPage(
     workshopReference: DocumentReference,
     navigationViewModel: NavigationViewModel,
     modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel
 ) {
     val repository = WorkshopRepository()
     val viewModel: WorkshopViewModel = viewModel(factory = WorkshopViewModelFactory(repository))
@@ -73,7 +75,18 @@ fun WorkshopDetailPage(
     Scaffold(
         modifier = modifier,
         topBar = {
-            Header(title = workshop?.name ?: "Detalles del Taller")
+            Header(
+                title = "Tu Taller UCC",
+                showBackIcon = true,
+                onBackClick = { navController.popBackStack() }, // Navegar hacia atrás
+                showLogoutIcon = true,
+                onLogoutClick = {
+                    authViewModel.signout() // Cerrar sesión
+                    navController.navigate("login") { // Redirigir a la pantalla de inicio de sesión
+                        popUpTo(0) // Limpia la pila de navegación
+                    }
+                }
+            )
         },
         bottomBar = {
             BottomNavBar(

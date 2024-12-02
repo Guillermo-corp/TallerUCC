@@ -23,6 +23,18 @@ class HomeViewModel : ViewModel() {
     private val _likedPosts = MutableStateFlow<List<String>>(emptyList())
     val likedPosts: StateFlow<List<String>> = _likedPosts
 
+    init {
+        FirebaseAuth.getInstance().addAuthStateListener { auth ->
+            if (auth.currentUser != null) {
+                viewModelScope.launch {
+                    loadPostsForFeed()
+                    loadLikedPosts()
+                    loadCommunities()
+                }
+            }
+        }
+    }
+
     // Cargar comunidades
     fun loadCommunities() {
         viewModelScope.launch {
@@ -49,7 +61,13 @@ class HomeViewModel : ViewModel() {
     fun loadPostsForFeed() {
         viewModelScope.launch {
             try {
-                val userId = currentUser?.uid
+                kotlinx.coroutines.delay(500) // Retraso para esperar la inicialización
+                val userId = FirebaseAuth.getInstance().currentUser?.uid
+                if (userId.isNullOrEmpty()) {
+                    println("Error: userId is null or empty.")
+                    return@launch
+                }
+
                 val userSnapshot = db.collection("users").document(userId ?: "").get().await()
                 val followedCommunities = userSnapshot.get("followedCommunities") as? List<String> ?: emptyList()
                 val createdCommunities = userSnapshot.get("communitiesCreated") as? List<String> ?: emptyList()
@@ -102,6 +120,7 @@ class HomeViewModel : ViewModel() {
             }
         }
     }
+
 
     fun toggleLike(postId: String, isLiked: Boolean) {
         val userId = currentUser?.uid ?: return

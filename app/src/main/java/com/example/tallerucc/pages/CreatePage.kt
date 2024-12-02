@@ -50,12 +50,17 @@ import com.example.tallerucc.pages.create.CreationTabs
 import com.example.tallerucc.pages.create.PostForm
 import com.example.tallerucc.pages.create.WorkshopForm
 import com.example.tallerucc.repository.uploadImageToImgur
+import com.example.tallerucc.viewModel.AuthViewModel
 import com.example.tallerucc.viewModel.CreateViewModel
 import com.google.firebase.firestore.DocumentReference
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-fun CreatePage(navController: NavController, createViewModel: CreateViewModel) {
+fun CreatePage(
+    navController: NavController,
+    createViewModel: CreateViewModel,
+    authViewModel: AuthViewModel
+) {
     val userRoles by createViewModel.userRoles.collectAsState()
 
     var selectedOption by remember { mutableStateOf("Comunidad") }
@@ -69,7 +74,18 @@ fun CreatePage(navController: NavController, createViewModel: CreateViewModel) {
 
     Scaffold(
         topBar = {
-            Header(title = "Tu Taller UCC")
+            Header(
+                title = "Tu Taller UCC",
+                showBackIcon = true,
+                onBackClick = { navController.popBackStack() }, // Navegar hacia atrás
+                showLogoutIcon = true,
+                onLogoutClick = {
+                    authViewModel.signout() // Cerrar sesión
+                    navController.navigate("login") { // Redirigir a la pantalla de inicio de sesión
+                        popUpTo(0) // Limpia la pila de navegación
+                    }
+                }
+            )
         },
         content = { innerPadding ->
             Column(

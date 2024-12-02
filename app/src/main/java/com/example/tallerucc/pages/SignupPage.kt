@@ -46,7 +46,7 @@ fun SignupPage(
 
     LaunchedEffect(authState.value) {
         when (authState.value) {
-            is AuthState.Authenticated -> navController.navigate("home")
+//            is AuthState.Authenticated -> navController.navigate("home")
             is AuthState.VerificationPending -> navController.navigate("verificationPending")
             is AuthState.Error -> Toast.makeText(
                 context,

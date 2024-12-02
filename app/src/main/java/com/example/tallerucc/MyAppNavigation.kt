@@ -21,6 +21,7 @@ import com.example.tallerucc.viewModel.CommunityViewModel
 import com.example.tallerucc.viewModel.CreateViewModel
 import com.example.tallerucc.viewModel.HomeViewModel
 import com.example.tallerucc.viewModel.NavigationViewModel
+import com.example.tallerucc.viewModel.NotificationViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
@@ -28,10 +29,13 @@ fun MyAppNavigation(
     modifier: Modifier = Modifier,
     authViewModel: AuthViewModel,
     navigationViewModel: NavigationViewModel = viewModel(),
-    homeViewModel: HomeViewModel = viewModel()
+    homeViewModel: HomeViewModel = viewModel(),
+
 ) {
     val navController = rememberNavController()
     val selectedIndex by navigationViewModel.selectedIndex.collectAsState()
+    val notificationViewModel: NotificationViewModel = viewModel()
+
 
     // Observa los cambios en la navegación
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -53,14 +57,15 @@ fun MyAppNavigation(
             VerificationPendingPage(navController = navController, authViewModel = authViewModel)
         }
         composable("home") {
-            HomePage(navController = navController, homeViewModel = homeViewModel, navigationViewModel = navigationViewModel)
+            HomePage(navController = navController, homeViewModel = homeViewModel, navigationViewModel = navigationViewModel, authViewModel = AuthViewModel())
         }
         composable("communities") {
             val communityViewModel: CommunityViewModel = viewModel() // Use viewModel()
             CommunitiesPage(
                 navController = navController,
                 communityViewModel = communityViewModel,
-                navigationViewModel = navigationViewModel
+                navigationViewModel = navigationViewModel,
+                authViewModel = AuthViewModel()
             )
         }
         composable("communityDetail/{communityId}") { backStackEntry ->
@@ -79,13 +84,15 @@ fun MyAppNavigation(
         composable("workshops") {
             WorkshopsCategoriesPage(
                 navController = navController,
-                navigationViewModel = navigationViewModel
+                navigationViewModel = navigationViewModel,
+                authViewModel = AuthViewModel()
             )
         }
         composable("createPage") {
             CreatePage(
                 navController = navController,
-                createViewModel = CreateViewModel()
+                createViewModel = CreateViewModel(),
+                authViewModel = AuthViewModel()
             )
         }
         composable("workshops/{categoryId}") { backStackEntry ->
@@ -95,7 +102,8 @@ fun MyAppNavigation(
                 WorkshopsByCategoryPage(
                     navController = navController,
                     categoryReference = categoryReference,
-                    navigationViewModel = navigationViewModel
+                    navigationViewModel = navigationViewModel,
+                    authViewModel = AuthViewModel()
                 )
             }
         }
@@ -107,14 +115,21 @@ fun MyAppNavigation(
                 WorkshopDetailPage(
                     navController = navController,
                     workshopReference = workshopReference,
-                    navigationViewModel = navigationViewModel
+                    navigationViewModel = navigationViewModel,
+                    authViewModel = AuthViewModel()
                 )
             }
         }
 
         composable("notifications") {
-            NotificationPage(navController = navController, authViewModel = authViewModel, navigationViewModel = navigationViewModel)
+            NotificationPage(
+                navController = navController,
+                notificationViewModel = notificationViewModel,
+                navigationViewModel = navigationViewModel,
+                authViewModel = AuthViewModel()
+            )
         }
+
     }
 }
 

@@ -19,9 +19,10 @@ fun BottomNavBar(
     navController: NavController,
     navItems: List<NavItem>,
     selectedIndex: Int,
-    onItemSelected: (Int) -> Unit
+    onItemSelected: (Int) -> Unit,
+    unreadNotificationsCount: Int? = null // Nuevo parámetro
 ) {
-    NavigationBar (
+    NavigationBar(
         modifier = Modifier
             .height(112.dp)
     ) {
@@ -29,7 +30,12 @@ fun BottomNavBar(
             NavigationBarItem(
                 icon = {
                     BadgedBox(badge = {
-                        if (navItem.badgeCount != null && navItem.badgeCount > 0) {
+                        // Lógica para mostrar el badge dinámicamente
+                        if (navItem.route == "notifications" && unreadNotificationsCount != null && unreadNotificationsCount > 0) {
+                            Badge {
+                                Text(text = unreadNotificationsCount.toString())
+                            }
+                        } else if (navItem.badgeCount != null && navItem.badgeCount > 0) {
                             Badge {
                                 Text(text = navItem.badgeCount.toString())
                             }
@@ -38,11 +44,13 @@ fun BottomNavBar(
                         Icon(imageVector = navItem.icon, contentDescription = navItem.label)
                     }
                 },
-                label = { Text(
-                    text = navItem.label,
-                    maxLines = 1,
-                    style = Typography.labelSmall
-                ) },
+                label = {
+                    Text(
+                        text = navItem.label,
+                        maxLines = 1,
+                        style = Typography.labelSmall
+                    )
+                },
                 selected = selectedIndex == index,
                 onClick = {
                     if (navController.currentDestination?.route != navItem.route) {

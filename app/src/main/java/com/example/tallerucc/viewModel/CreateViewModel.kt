@@ -6,10 +6,12 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tallerucc.R
 import com.example.tallerucc.model.Category
 import com.example.tallerucc.model.Community
 import com.example.tallerucc.repository.uploadImageToImgur
 import com.example.tallerucc.utils.Constants
+import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
@@ -23,9 +25,19 @@ import com.google.firebase.firestore.FieldValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
+import java.io.FileInputStream
+import java.io.IOException
 
 class CreateViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
+    private val client = OkHttpClient()
+
 
     // Usa el token directamente desde las constantes
     private val accessToken = Constants.ACCESS_TOKEN
@@ -167,6 +179,7 @@ class CreateViewModel : ViewModel() {
     }
 
     fun createPost(
+        context: Context,
         title: String,
         textContent: String,
         authorId: String,
@@ -195,11 +208,19 @@ class CreateViewModel : ViewModel() {
                 db.collection("posts")
                     .add(post)
                     .addOnSuccessListener {
-                        Log.d("CreateViewModel", "Publicación creada exitosamente")
+                        Log.d("CreateViewModel", "Post created successfully")
+
+                        // Enviar notificaciones dependiendo del tipo de publicación
+                        if (isOfficial) {
+                            sendNotificationToAllUsers(context, title, textContent)
+                        } else if (communityName != null) {
+                            sendNotificationToCommunityFollowers(context, communityName, title, textContent)
+                        }
+
                         onSuccess()
                     }
                     .addOnFailureListener { exception ->
-                        Log.e("CreateViewModel", "Error al crear la publicación", exception)
+                        Log.e("CreateViewModel", "Error creating post", exception)
                         onFailure(exception)
                     }
             } catch (e: Exception) {
@@ -207,6 +228,134 @@ class CreateViewModel : ViewModel() {
                 onFailure(e)
             }
         }
+    }
+
+
+    private fun sendNotificationToAllUsers(context: Context, title: String, message: String) {
+        viewModelScope.launch {
+            try {
+                val querySnapshot = db.collection("users").get().await()
+
+                querySnapshot.documents.forEach { document ->
+                    val userId = document.id
+                    val tokens = document.get("deviceTokens") as? List<String> // Cambiar a array
+
+                    if (!tokens.isNullOrEmpty()) {
+                        tokens.forEach { token ->
+                            addNotificationToFirestore(userId, title, message)
+                            sendPushNotificationToDevice(context, token, title, message) // Enviar a cada token
+                        }
+                    } else {
+                        Log.e("CreateViewModel", "No tokens found for user $userId")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("CreateViewModel", "Error fetching users", e)
+            }
+        }
+    }
+
+
+
+
+    private fun sendNotificationToCommunityFollowers(context: Context, communityName: String, title: String, message: String) {
+        viewModelScope.launch {
+            try {
+                val querySnapshot = db.collection("users")
+                    .whereArrayContains("followedCommunities", communityName)
+                    .get()
+                    .await()
+
+                querySnapshot.documents.forEach { document ->
+                    val userId = document.id
+                    val tokens = document.get("deviceTokens") as? List<String> // Cambiar a array
+
+                    if (!tokens.isNullOrEmpty()) {
+                        tokens.forEach { token ->
+                            addNotificationToFirestore(userId, title, message)
+                            sendPushNotificationToDevice(context, token, title, message) // Enviar a cada token
+                        }
+                    } else {
+                        Log.e("CreateViewModel", "No tokens found for user $userId")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("CreateViewModel", "Error fetching community followers", e)
+            }
+        }
+    }
+
+
+
+
+    suspend fun sendPushNotificationToDevice(context: Context, deviceToken: String, title: String, body: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                // Ruta al archivo JSON de la clave privada
+                val googleCredentials = GoogleCredentials.fromStream(
+                    context.resources.openRawResource(R.raw.service_account)
+                ).createScoped(listOf("https://www.googleapis.com/auth/firebase.messaging"))
+
+                googleCredentials.refreshIfExpired()
+                val accessToken = googleCredentials.accessToken.tokenValue
+
+                // Construir el payload
+                val jsonPayload = """
+                {
+                    "message": {
+                        "token": "$deviceToken",
+                        "notification": {
+                            "title": "$title",
+                            "body": "$body"
+                        }
+                    }
+                }
+            """.trimIndent()
+
+                // Enviar la solicitud
+                val client = OkHttpClient()
+                val mediaType = "application/json".toMediaTypeOrNull()
+                val requestBody = jsonPayload.toRequestBody(mediaType)
+                val request = Request.Builder()
+                    .url("https://fcm.googleapis.com/v1/projects/tallerucc-51203/messages:send")
+                    .post(requestBody)
+                    .addHeader("Authorization", "Bearer $accessToken")
+                    .addHeader("Content-Type", "application/json")
+                    .build()
+
+                client.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        Log.d("FCM", "Notificación enviada con éxito.")
+                    } else {
+                        Log.e("FCM", "Error al enviar notificación: ${response.body?.string()}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("FCM", "Error en sendPushNotificationToDevice: ${e.message}", e)
+            }
+        }
+    }
+
+
+
+
+    private fun addNotificationToFirestore(userId: String, title: String, message: String) {
+        val notification = mapOf(
+            "userId" to userId,
+            "title" to title,
+            "message" to message,
+            "timestamp" to Timestamp.now(),
+            "read" to false
+        )
+
+        db.collection("notifications")
+            .add(notification)
+            .addOnSuccessListener {
+                Log.d("CreateViewModel", "Notification saved for user $userId")
+            }
+            .addOnFailureListener { e ->
+                Log.e("CreateViewModel", "Error saving notification for user $userId", e)
+            }
     }
 
     private fun loadFollowedCommunities() {
@@ -261,5 +410,4 @@ class CreateViewModel : ViewModel() {
             }
         }
     }
-
 }

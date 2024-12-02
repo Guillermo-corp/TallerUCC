@@ -1,7 +1,11 @@
 package com.example.tallerucc.pages.composables
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -14,9 +18,10 @@ import com.example.tallerucc.ui.theme.Typography
 @Composable
 fun Header(
     title: String,
-    showProfileIcon: Boolean = true,
-    onMenuClick: () -> Unit = {}, // Acciones para el menú, si las necesitas
-    onProfileClick: () -> Unit = {}
+    showBackIcon: Boolean = false, // Mostrar flecha hacia atrás
+    onBackClick: () -> Unit = {}, // Acción para la flecha
+    showLogoutIcon: Boolean = false, // Mostrar ícono de cerrar sesión
+    onLogoutClick: () -> Unit = {}, // Acción para cerrar sesión
 ) {
     TopAppBar(
         title = {
@@ -26,21 +31,23 @@ fun Header(
                 color = MaterialTheme.colorScheme.onPrimary
             )
         },
-//        navigationIcon = {
-//            IconButton(onClick = onMenuClick) {
-//                Icon(
-//                    imageVector = Icons.Default.Menu,
-//                    contentDescription = "Menu Icon",
-//                    tint = MaterialTheme.colorScheme.onPrimary
-//                )
-//            }
-//        },
-        actions = {
-            if (showProfileIcon) {
-                IconButton(onClick = onProfileClick) {
+        navigationIcon = {
+            if (showBackIcon) {
+                IconButton(onClick = onBackClick) {
                     Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Profile Icon",
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Flecha hacia atrás
+                        contentDescription = "Back Icon",
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            }
+        },
+        actions = {
+            if (showLogoutIcon) {
+                IconButton(onClick = onLogoutClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp, // Ícono de logout
+                        contentDescription = "Logout Icon",
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
@@ -53,5 +60,6 @@ fun Header(
         modifier = Modifier
     )
 }
+
 
 

@@ -53,7 +53,8 @@ fun CommunitiesPage(
     modifier: Modifier = Modifier,
     navController: NavController,
     navigationViewModel: NavigationViewModel,
-    communityViewModel: CommunityViewModel
+    communityViewModel: CommunityViewModel,
+    authViewModel: AuthViewModel
 ) {
     val selectedIndex by navigationViewModel.selectedIndex.collectAsState()
 
@@ -65,7 +66,18 @@ fun CommunitiesPage(
     Scaffold (
         modifier = modifier,
         topBar = {
-            Header(title = "Comunidades UCC")
+            Header(
+                title = "Tu Taller UCC",
+                showBackIcon = true,
+                onBackClick = { navController.popBackStack() }, // Navegar hacia atrás
+                showLogoutIcon = true,
+                onLogoutClick = {
+                    authViewModel.signout() // Cerrar sesión
+                    navController.navigate("login") { // Redirigir a la pantalla de inicio de sesión
+                        popUpTo(0) // Limpia la pila de navegación
+                    }
+                }
+            )
         },
         bottomBar = {
             BottomNavBar(

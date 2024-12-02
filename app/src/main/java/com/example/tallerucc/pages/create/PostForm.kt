@@ -239,6 +239,7 @@ fun PostForm(navController: NavController, createViewModel: CreateViewModel) {
                 if (uploadedImageUrls.isNotEmpty()) {
                     // Crear la publicación directamente
                     createViewModel.createPost(
+                        context = context,
                         title = title,
                         textContent = textContent,
                         authorId = FirebaseAuth.getInstance().currentUser?.email ?: "",

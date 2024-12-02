@@ -45,9 +45,19 @@ android {
     }
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+            excludes.add("META-INF/DEPENDENCIES")
+            excludes.add("META-INF/LICENSE")
+            excludes.add("META-INF/LICENSE.txt")
+            excludes.add("META-INF/license.txt")
+            excludes.add("META-INF/NOTICE")
+            excludes.add("META-INF/NOTICE.txt")
+            excludes.add("META-INF/notice.txt")
+            excludes.add("META-INF/ASL2.0")
+            excludes.add("mozilla/public-suffix-list.txt")
         }
     }
+
 }
 
 dependencies {
@@ -65,6 +75,7 @@ dependencies {
     implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.material)
+    implementation(libs.firebase.messaging)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -80,6 +91,9 @@ dependencies {
     implementation (libs.coil.kt.coil.compose) // Para cargar imágenes en Jetpack Compose
 
     implementation (libs.google.accompanist.flowlayout)
+
+
+    implementation (libs.google.auth.library.oauth2.http)
 
 
 

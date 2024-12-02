@@ -29,6 +29,7 @@ import com.example.tallerucc.pages.composables.Header
 import com.example.tallerucc.pages.composables.CategoryItem
 import com.example.tallerucc.pages.composables.FloatingActionButtonCustom
 import com.example.tallerucc.repository.WorkshopRepository
+import com.example.tallerucc.viewModel.AuthViewModel
 import com.example.tallerucc.viewModel.WorkshopViewModelFactory
 
 
@@ -36,7 +37,8 @@ import com.example.tallerucc.viewModel.WorkshopViewModelFactory
 fun WorkshopsCategoriesPage(
     navController: NavController,
     navigationViewModel: NavigationViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel
 ) {
     val repository = WorkshopRepository()
     val viewModel: WorkshopViewModel = viewModel(factory = WorkshopViewModelFactory(repository))
@@ -50,7 +52,18 @@ fun WorkshopsCategoriesPage(
     Scaffold(
         modifier = modifier,
         topBar = {
-            Header(title = "Categorías")
+            Header(
+                title = "Tu Taller UCC",
+                showBackIcon = true,
+                onBackClick = { navController.popBackStack() }, // Navegar hacia atrás
+                showLogoutIcon = true,
+                onLogoutClick = {
+                    authViewModel.signout() // Cerrar sesión
+                    navController.navigate("login") { // Redirigir a la pantalla de inicio de sesión
+                        popUpTo(0) // Limpia la pila de navegación
+                    }
+                }
+            )
         },
         bottomBar = {
             BottomNavBar(

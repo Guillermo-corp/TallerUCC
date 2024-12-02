@@ -38,17 +38,33 @@ fun HomePage(
     modifier: Modifier = Modifier,
     navController: NavController,
     homeViewModel: HomeViewModel,
-    navigationViewModel: NavigationViewModel
+    navigationViewModel: NavigationViewModel,
+    authViewModel: AuthViewModel
 ) {
     val selectedIndex by navigationViewModel.selectedIndex.collectAsState()
     val posts by homeViewModel.posts.collectAsState()
     val lazyListState = rememberLazyListState() // Recordar el estado del LazyColumn
+    val authState = authViewModel.authState.observeAsState()
 
-    LaunchedEffect(Unit) {
-        homeViewModel.loadPostsForFeed()
-        homeViewModel.loadLikedPosts()
-        homeViewModel.loadCommunities() // Carga las comunidades
+    LaunchedEffect(authState.value) {
+        when (authState.value) {
+            is AuthState.Unauthenticated -> {
+                navController.navigate("login") {
+                    popUpTo(0) // Limpia toda la pila de navegación
+                }
+            }
+            else -> Unit
+        }
     }
+
+    LaunchedEffect(authState.value) {
+        if (authState.value is AuthState.Authenticated) {
+            homeViewModel.loadPostsForFeed()
+            homeViewModel.loadLikedPosts()
+            homeViewModel.loadCommunities()
+        }
+    }
+
 
     // Detectar cuando el índice visible está cerca de cargar nuevos elementos
     LaunchedEffect(lazyListState.firstVisibleItemIndex) {
@@ -63,7 +79,15 @@ fun HomePage(
     Scaffold(
         modifier = modifier,
         topBar = {
-            Header(title = "Tu Taller UCC")
+            Header(
+                title = "Tu Taller UCC",
+                showBackIcon = true,
+                onBackClick = { navController.popBackStack() }, // Navegar hacia atrás
+                showLogoutIcon = true,
+                onLogoutClick = {
+                    authViewModel.signout() // Cerrar sesión
+                }
+            )
         },
         bottomBar = {
             BottomNavBar(

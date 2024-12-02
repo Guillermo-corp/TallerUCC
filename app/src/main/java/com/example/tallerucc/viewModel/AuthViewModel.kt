@@ -10,7 +10,9 @@ import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 
 class AuthViewModel : ViewModel() {
 
@@ -20,8 +22,13 @@ class AuthViewModel : ViewModel() {
     val authState: LiveData<AuthState> = _authState
 
     init {
-        checkAuthState()
+        auth.addAuthStateListener { firebaseAuth ->
+            val state = if (firebaseAuth.currentUser == null) "Unauthenticated" else "Authenticated"
+            Log.d("AuthViewModel", "AuthState changed: $state")
+            _authState.value = if (firebaseAuth.currentUser == null) AuthState.Unauthenticated else AuthState.Authenticated
+        }
     }
+
 
     fun checkAuthState() {
         if (auth.currentUser != null) {
@@ -64,19 +71,24 @@ class AuthViewModel : ViewModel() {
                 if (task.isSuccessful) {
                     if (auth.currentUser?.isEmailVerified == true) {
                         Log.d("AuthViewModel", "Login successful for email: $email")
+
                         _authState.value = AuthState.Authenticated
+                        // Actualizar el token del dispositivo
+//                        updateDeviceTokenForUser()
+
                     } else {
                         val errorMessage = "Please verify your email before logging in."
                         Log.e("AuthViewModel", errorMessage)
                         _authState.value = AuthState.Error(errorMessage)
                     }
                 } else {
-                    val errorMessage = handleAuthError(task.exception) // Centralización de errores
-                    Log.e("AuthViewModel", "Login failed: $errorMessage", task.exception) // Log error
+                    val errorMessage = handleAuthError(task.exception)
+                    Log.e("AuthViewModel", "Login failed: $errorMessage", task.exception)
                     _authState.value = AuthState.Error(errorMessage)
                 }
             }
     }
+
 
 
 
@@ -113,6 +125,8 @@ class AuthViewModel : ViewModel() {
                                     "followedCommunities" to emptyList<String>(),
                                     "communitiesCreated" to emptyList<String>(),
                                     "registeredWorkshops" to emptyList<String>(),// Default role
+                                    "likedPosts" to emptyList<String>(),
+                                    "deviceToken" to emptyList<String>()
                                 )
 
                                 FirebaseFirestore.getInstance()
@@ -144,9 +158,11 @@ class AuthViewModel : ViewModel() {
 
 
     fun signout() {
+        Log.d("AuthViewModel", "Signout called")
         auth.signOut()
-        _authState.value = AuthState.Unauthenticated
+        checkAuthState()
     }
+
 
     fun forgotPassword(email: String) {
         // Check if the email is empty
@@ -166,6 +182,7 @@ class AuthViewModel : ViewModel() {
                 }
             }
     }
+
 
 }
 

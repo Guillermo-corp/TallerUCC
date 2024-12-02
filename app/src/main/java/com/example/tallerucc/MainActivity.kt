@@ -1,6 +1,7 @@
 package com.example.tallerucc
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,7 +15,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.tallerucc.ui.theme.TallerUCCTheme
+import com.example.tallerucc.utils.NotificationHelper
 import com.example.tallerucc.viewModel.AuthViewModel
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +36,17 @@ class MainActivity : ComponentActivity() {
 
             }
         }
+
+        // Generate the device token for debugging purposes only
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                Log.d("FCM", "Device token: $token")
+            } else {
+                Log.e("FCM", "Failed to retrieve device token", task.exception)
+            }
+        }
     }
 }
+
 
