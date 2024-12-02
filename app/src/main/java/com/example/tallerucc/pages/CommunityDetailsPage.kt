@@ -34,6 +34,7 @@ import com.example.tallerucc.pages.composables.CommunityHeader
 import com.example.tallerucc.pages.composables.PostCard
 import com.example.tallerucc.viewModel.CommunityViewModel
 import com.example.tallerucc.viewModel.NavigationViewModel
+import com.example.tallerucc.viewModel.NotificationViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -41,7 +42,8 @@ fun CommunityDetailsPage(
     navController: NavController,
     communityId: String,
     communityViewModel: CommunityViewModel,
-    navigationViewModel: NavigationViewModel
+    navigationViewModel: NavigationViewModel,
+    notificationViewModel: NotificationViewModel,
 ) {
     val community = remember { mutableStateOf<Community?>(null) }
     val posts = remember { mutableStateListOf<Map<String, Any>>() }
@@ -90,7 +92,8 @@ fun CommunityDetailsPage(
                 navController = navController,
                 navItems = navItems,
                 selectedIndex = selectedIndex,
-                onItemSelected = { navigationViewModel.selectIndex(it) }
+                onItemSelected = { navigationViewModel.selectIndex(it) },
+                unreadNotificationsCount = notificationViewModel.unreadNotificationsCount.collectAsState().value
             )
         },
         contentWindowInsets = WindowInsets(0) // Deshabilitar los insets

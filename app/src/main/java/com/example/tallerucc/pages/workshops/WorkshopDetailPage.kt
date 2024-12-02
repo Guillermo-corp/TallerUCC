@@ -50,6 +50,7 @@ import com.example.tallerucc.ui.theme.Typography
 import com.example.tallerucc.ui.theme.White
 import com.example.tallerucc.viewModel.AuthViewModel
 import com.example.tallerucc.viewModel.NavigationViewModel
+import com.example.tallerucc.viewModel.NotificationViewModel
 import com.example.tallerucc.viewModel.WorkshopViewModel
 import com.example.tallerucc.viewModel.WorkshopViewModelFactory
 import com.google.firebase.firestore.DocumentReference
@@ -61,7 +62,8 @@ fun WorkshopDetailPage(
     workshopReference: DocumentReference,
     navigationViewModel: NavigationViewModel,
     modifier: Modifier = Modifier,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    notificationViewModel: NotificationViewModel,
 ) {
     val repository = WorkshopRepository()
     val viewModel: WorkshopViewModel = viewModel(factory = WorkshopViewModelFactory(repository))
@@ -93,7 +95,8 @@ fun WorkshopDetailPage(
                 navController = navController,
                 navItems = navItems,
                 selectedIndex = selectedIndex,
-                onItemSelected = { navigationViewModel.selectIndex(it) }
+                onItemSelected = { navigationViewModel.selectIndex(it) },
+                unreadNotificationsCount = notificationViewModel.unreadNotificationsCount.collectAsState().value
             )
         }
     ) { innerPadding ->

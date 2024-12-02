@@ -1,5 +1,6 @@
 package com.example.tallerucc.pages
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -83,19 +84,27 @@ fun NotificationPage(
             } else {
                 LazyColumn {
                     items(notifications) { notification ->
+                        val communityId = notification["communityId"] as? String // Puede ser nul
+
                         NotificationCard(
                             title = notification["title"] as String,
                             message = notification["message"] as String,
                             timestamp = notification["timestamp"] as Timestamp,
                             isRead = notification["read"] as Boolean,
-                            communityLogo = notification["imageUrl"] as? String, // Corregido aquí
+                            communityLogo = notification["imageUrl"] as? String,
+                            communityId = notification["communityId"] as? String, // Nuevo campo
                             onClick = {
                                 notificationViewModel.markNotificationAsRead(notification["id"] as String)
+                                if (communityId != null) {
+                                    navController.navigate("communityDetail/$communityId")
+                                } else {
+                                    // No navegar, solo marcar como leída
+                                    Log.d("NotificationPage", "Notification marked as read, no navigation required.")
+                                }
                             }
                         )
                     }
                 }
-
             }
         }
     }

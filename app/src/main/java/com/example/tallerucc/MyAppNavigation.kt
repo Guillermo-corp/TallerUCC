@@ -7,6 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -28,11 +29,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 fun MyAppNavigation(
     modifier: Modifier = Modifier,
     authViewModel: AuthViewModel,
+    navController: androidx.navigation.NavHostController, // Asegurarse de que sea NavHostController
     navigationViewModel: NavigationViewModel = viewModel(),
     homeViewModel: HomeViewModel = viewModel(),
 
-) {
-    val navController = rememberNavController()
+    ) {
+
     val selectedIndex by navigationViewModel.selectedIndex.collectAsState()
     val notificationViewModel: NotificationViewModel = viewModel()
 
@@ -44,6 +46,7 @@ fun MyAppNavigation(
     // Llama al ViewModel para actualizar el índice según la ruta actual
     LaunchedEffect(currentRoute) {
         navigationViewModel.updateSelectedIndexBasedOnRoute(currentRoute)
+        notificationViewModel.loadUnreadNotificationsCount()
     }
 
     NavHost(navController = navController, startDestination = "login") {
@@ -57,7 +60,7 @@ fun MyAppNavigation(
             VerificationPendingPage(navController = navController, authViewModel = authViewModel)
         }
         composable("home") {
-            HomePage(navController = navController, homeViewModel = homeViewModel, navigationViewModel = navigationViewModel, authViewModel = AuthViewModel())
+            HomePage(navController = navController, homeViewModel = homeViewModel, navigationViewModel = navigationViewModel, authViewModel = AuthViewModel(), notificationViewModel = NotificationViewModel())
         }
         composable("communities") {
             val communityViewModel: CommunityViewModel = viewModel() // Use viewModel()
@@ -65,7 +68,8 @@ fun MyAppNavigation(
                 navController = navController,
                 communityViewModel = communityViewModel,
                 navigationViewModel = navigationViewModel,
-                authViewModel = AuthViewModel()
+                authViewModel = AuthViewModel(),
+                notificationViewModel = NotificationViewModel()
             )
         }
         composable("communityDetail/{communityId}") { backStackEntry ->
@@ -76,7 +80,8 @@ fun MyAppNavigation(
                     navController = navController,
                     communityId = communityId,
                     communityViewModel = communityViewModel,
-                    navigationViewModel = navigationViewModel
+                    navigationViewModel = navigationViewModel,
+                    notificationViewModel = NotificationViewModel()
                 )
             }
         }
@@ -85,7 +90,8 @@ fun MyAppNavigation(
             WorkshopsCategoriesPage(
                 navController = navController,
                 navigationViewModel = navigationViewModel,
-                authViewModel = AuthViewModel()
+                authViewModel = AuthViewModel(),
+                notificationViewModel = NotificationViewModel()
             )
         }
         composable("createPage") {
@@ -103,7 +109,8 @@ fun MyAppNavigation(
                     navController = navController,
                     categoryReference = categoryReference,
                     navigationViewModel = navigationViewModel,
-                    authViewModel = AuthViewModel()
+                    authViewModel = AuthViewModel(),
+                    notificationViewModel = NotificationViewModel()
                 )
             }
         }
@@ -116,7 +123,8 @@ fun MyAppNavigation(
                     navController = navController,
                     workshopReference = workshopReference,
                     navigationViewModel = navigationViewModel,
-                    authViewModel = AuthViewModel()
+                    authViewModel = AuthViewModel(),
+                    notificationViewModel = NotificationViewModel()
                 )
             }
         }

@@ -183,6 +183,7 @@ class CreateViewModel : ViewModel() {
         title: String,
         textContent: String,
         authorId: String,
+        communityId: String?, // Nuevo parámetro
         communityName: String?,
         communityLogo: String?, // Nuevo parámetro
         imageUrls: List<String>, // Cambiado a List<String>
@@ -197,6 +198,7 @@ class CreateViewModel : ViewModel() {
                     "title" to title,
                     "textContent" to textContent,
                     "authorId" to authorId,
+                    "communityId" to communityId, // Agregar communityId
                     "communityName" to communityName, // Null si es oficial
                     "communityLogo" to communityLogo, // Agregar logo al documento
                     "createdAt" to Timestamp.now(),
@@ -216,8 +218,8 @@ class CreateViewModel : ViewModel() {
 
                         if (isOfficial) {
                             sendNotificationToAllUsers(context, notificationTitle, notificationImage, title)
-                        } else if (communityName != null) {
-                            sendNotificationToCommunityFollowers(context, communityName, notificationTitle, notificationImage, title)
+                        } else if (communityId != null && communityName != null) {
+                            sendNotificationToCommunityFollowers(context, communityName, communityId, notificationTitle, notificationImage, title)
                         }
 
 
@@ -247,7 +249,7 @@ class CreateViewModel : ViewModel() {
                     if (!tokens.isNullOrEmpty()) {
                         tokens.forEach { token ->
                             if (communityName != null && communityLogo != null) {
-                                addNotificationToFirestore(userId, communityName, postTitle, communityLogo)
+                                addNotificationToFirestore(userId, communityName, postTitle, communityLogo, null)
                                 sendPushNotificationToDevice(context, token, communityName, postTitle, communityLogo)
                             }
                         }
@@ -268,6 +270,7 @@ class CreateViewModel : ViewModel() {
     private fun sendNotificationToCommunityFollowers(
         context: Context,
         communityName: String,
+        communityId: String, // Agregar communityId
         title: String,
         imageUrl: String,
         postTitle: String
@@ -285,7 +288,7 @@ class CreateViewModel : ViewModel() {
 
                     if (!tokens.isNullOrEmpty()) {
                         tokens.forEach { token ->
-                            addNotificationToFirestore(userId, title, postTitle, imageUrl)
+                            addNotificationToFirestore(userId, title, postTitle, imageUrl, communityId)
                             sendPushNotificationToDevice(context, token, title, postTitle, imageUrl)
                         }
                     } else {
@@ -354,14 +357,15 @@ class CreateViewModel : ViewModel() {
     }
 
 
-    private fun addNotificationToFirestore(userId: String, title: String, message: String, imageUrl: String) {
+    private fun addNotificationToFirestore(userId: String, title: String, message: String, imageUrl: String, communityId: String?) {
         val notification = mapOf(
             "userId" to userId,
             "title" to title,
             "message" to message,
             "imageUrl" to imageUrl,
             "timestamp" to Timestamp.now(),
-            "read" to false
+            "read" to false,
+            "communityId" to communityId
         )
 
         db.collection("notifications")

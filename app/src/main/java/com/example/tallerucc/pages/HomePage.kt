@@ -32,6 +32,7 @@ import com.example.tallerucc.viewModel.NavigationViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 import androidx.compose.foundation.lazy.rememberLazyListState
+import com.example.tallerucc.viewModel.NotificationViewModel
 
 @Composable
 fun HomePage(
@@ -39,7 +40,8 @@ fun HomePage(
     navController: NavController,
     homeViewModel: HomeViewModel,
     navigationViewModel: NavigationViewModel,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    notificationViewModel: NotificationViewModel,
 ) {
     val selectedIndex by navigationViewModel.selectedIndex.collectAsState()
     val posts by homeViewModel.posts.collectAsState()
@@ -94,7 +96,8 @@ fun HomePage(
                 navController = navController,
                 navItems = navItems,
                 selectedIndex = selectedIndex,
-                onItemSelected = { navigationViewModel.selectIndex(it) }
+                onItemSelected = { navigationViewModel.selectIndex(it) },
+                unreadNotificationsCount = notificationViewModel.unreadNotificationsCount.collectAsState().value
             )
         },
         floatingActionButton = {

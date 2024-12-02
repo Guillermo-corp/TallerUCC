@@ -24,21 +24,33 @@ import com.example.tallerucc.viewModel.AuthViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import android.Manifest
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val authViewModel: AuthViewModel by viewModels()
+
         setContent {
+            val navController = rememberNavController() // Mover NavController al nivel superior
             // Verifica el estado de autenticación
             LaunchedEffect(Unit) {
                 authViewModel.checkAuthState()
+
+                // Verificar si el Intent tiene datos para navegar a una página específica
+                val navigateTo = intent.getStringExtra("navigate_to")
+                if (navigateTo == "notifications") {
+                    navController.navigate("notifications")
+                }
             }
+
             TallerUCCTheme {
-
-                    MyAppNavigation(modifier = Modifier.padding(),authViewModel = authViewModel)
-
+                MyAppNavigation(
+                    modifier = Modifier.padding(),
+                    authViewModel = authViewModel,
+                    navController = navController
+                )
             }
         }
 

@@ -2,6 +2,7 @@ package com.example.tallerucc.pages.composables
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -11,7 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +33,7 @@ fun NotificationCard(
     timestamp: Timestamp,
     isRead: Boolean,
     communityLogo: String?, // Agregar el logo de la comunidad
+    communityId: String?, // Nuevo campo
     onClick: () -> Unit
 ) {
     val formattedDate = remember(timestamp) {
@@ -57,18 +61,32 @@ fun NotificationCard(
         ) {
             // Logo de la comunidad
             if (communityLogo != null) {
-                AsyncImage(
-                    model = communityLogo,
-                    contentDescription = "Logo de la comunidad",
-                    modifier = Modifier
-                        .size(48.dp)
-                        .padding(end = 8.dp)
-                )
+                if (communityLogo == "https://i.imgur.com/DCzUFzG.png") {
+                    AsyncImage(
+                        model = communityLogo,
+                        contentDescription = "Logo de la comunidad",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .padding(end = 0.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Fit // Ajusta el contenido sin recortar,
+                    )
+                } else if (communityLogo.isNotEmpty()) {
+                    AsyncImage(
+                        model = communityLogo,
+                        contentDescription = "Logo de la comunidad",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .padding(end = 0.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop // Recorta para llenar el espacio
+                    )
+                }
             } else {
                 Box(
                     modifier = Modifier
                         .size(48.dp)
-                        .padding(end = 8.dp),
+                        .padding(end = 0.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -79,6 +97,8 @@ fun NotificationCard(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.width(0.dp))
 
             // Información de la notificación
             Column(

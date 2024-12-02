@@ -30,6 +30,7 @@ import com.example.tallerucc.pages.composables.CategoryItem
 import com.example.tallerucc.pages.composables.FloatingActionButtonCustom
 import com.example.tallerucc.repository.WorkshopRepository
 import com.example.tallerucc.viewModel.AuthViewModel
+import com.example.tallerucc.viewModel.NotificationViewModel
 import com.example.tallerucc.viewModel.WorkshopViewModelFactory
 
 
@@ -38,7 +39,8 @@ fun WorkshopsCategoriesPage(
     navController: NavController,
     navigationViewModel: NavigationViewModel,
     modifier: Modifier = Modifier,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    notificationViewModel: NotificationViewModel,
 ) {
     val repository = WorkshopRepository()
     val viewModel: WorkshopViewModel = viewModel(factory = WorkshopViewModelFactory(repository))
@@ -70,7 +72,8 @@ fun WorkshopsCategoriesPage(
                 navController = navController,
                 navItems = navItems,
                 selectedIndex = selectedIndex,
-                onItemSelected = { navigationViewModel.selectIndex(it) }
+                onItemSelected = { navigationViewModel.selectIndex(it) },
+                unreadNotificationsCount = notificationViewModel.unreadNotificationsCount.collectAsState().value
             )
         },
         floatingActionButton = {

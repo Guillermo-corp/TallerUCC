@@ -44,7 +44,6 @@ class NotificationViewModel : ViewModel() {
     }
 
 
-    // Cargar la cantidad de notificaciones no leídas
     fun loadUnreadNotificationsCount() {
         val userId = currentUser?.uid ?: return
         db.collection("notifications")
@@ -52,13 +51,14 @@ class NotificationViewModel : ViewModel() {
             .whereEqualTo("read", false)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    println("Error loading unread notifications: ${error.message}")
+                    Log.e("NotificationViewModel", "Error loading unread notifications: ${error.message}")
                     return@addSnapshotListener
                 }
 
                 _unreadNotificationsCount.value = snapshot?.size() ?: 0
             }
     }
+
 
     // Marcar una notificación como leída
     fun markNotificationAsRead(notificationId: String) {

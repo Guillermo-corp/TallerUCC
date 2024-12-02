@@ -46,6 +46,7 @@ import com.example.tallerucc.viewModel.AuthViewModel
 import com.example.tallerucc.viewModel.CommunityViewModel
 import com.example.tallerucc.viewModel.CreateViewModel
 import com.example.tallerucc.viewModel.NavigationViewModel
+import com.example.tallerucc.viewModel.NotificationViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -54,7 +55,8 @@ fun CommunitiesPage(
     navController: NavController,
     navigationViewModel: NavigationViewModel,
     communityViewModel: CommunityViewModel,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    notificationViewModel: NotificationViewModel,
 ) {
     val selectedIndex by navigationViewModel.selectedIndex.collectAsState()
 
@@ -84,7 +86,8 @@ fun CommunitiesPage(
                 navController = navController,
                 navItems = navItems,
                 selectedIndex = selectedIndex,
-                onItemSelected = { navigationViewModel.selectIndex(it) }
+                onItemSelected = { navigationViewModel.selectIndex(it) },
+                unreadNotificationsCount = notificationViewModel.unreadNotificationsCount.collectAsState().value
             )
         },
         floatingActionButton = {

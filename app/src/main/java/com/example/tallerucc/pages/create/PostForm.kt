@@ -63,11 +63,15 @@ fun PostForm(navController: NavController, createViewModel: CreateViewModel) {
     val selectedImageUris = remember { mutableStateListOf<Uri>() }
     val uploadedImageUrls = remember { mutableStateListOf<String>() }
     val uploadedImagesSet = remember { mutableStateListOf<Uri>() }
+    var selectedCommunityId by remember { mutableStateOf<String?>(null) } // ID de la comunidad seleccionada
     var selectedCommunity by remember { mutableStateOf<String?>(null) }
     var selectedCommunityLogo by remember { mutableStateOf<String?>(null) } // Logo de la comunidad seleccionada
     var isOfficial by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     val context = LocalContext.current
+
+    // Obtener los roles del usuario
+    val userRoles by createViewModel.userRoles.collectAsState()
 
     // Comunidades que sigue el usuario
     val followedCommunities by createViewModel.followedCommunities.collectAsState()
@@ -85,18 +89,20 @@ fun PostForm(navController: NavController, createViewModel: CreateViewModel) {
         modifier = Modifier.padding(horizontal = 16.dp)
     )
 
-    // Checkbox para marcar como publicación oficial
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth(),
-    ) {
-        Checkbox(
-            checked = isOfficial,
-            onCheckedChange = { isOfficial = it }
-        )
-        Text(text = "Publicación oficial")
+    if ("admin" in userRoles){
+        // Checkbox para marcar como publicación oficial
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(),
+        ) {
+            Checkbox(
+                checked = isOfficial,
+                onCheckedChange = { isOfficial = it }
+            )
+            Text(text = "Publicación oficial")
+        }
     }
 
     if (!isOfficial) {
@@ -105,6 +111,7 @@ fun PostForm(navController: NavController, createViewModel: CreateViewModel) {
             onCommunitySelected = { community ->
                 selectedCommunity = community.name // Nombre de la comunidad
                 selectedCommunityLogo = community.iconUrl // Logo de la comunidad
+                selectedCommunityId = community.id // ID de la comunidad
             },
         )
     }
@@ -243,6 +250,7 @@ fun PostForm(navController: NavController, createViewModel: CreateViewModel) {
                         title = title,
                         textContent = textContent,
                         authorId = FirebaseAuth.getInstance().currentUser?.email ?: "",
+                        communityId = if (isOfficial) null else selectedCommunityId, // Pasar communityId
                         communityName = if (isOfficial) "Universidad Cristóbal Colón" else selectedCommunity,
                         communityLogo = if (isOfficial) "https://i.imgur.com/DCzUFzG.png" else selectedCommunityLogo,
                         imageUrls = uploadedImageUrls,
