@@ -24,7 +24,7 @@ object NotificationHelper {
         val notificationId = System.currentTimeMillis().toInt()
 
         val notificationBuilder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_notification) // Replace with your app's icon
+            .setSmallIcon(R.drawable.logo_ucc_neutral) // Replace with your app's icon
             .setContentTitle(title)
             .setContentText(body)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

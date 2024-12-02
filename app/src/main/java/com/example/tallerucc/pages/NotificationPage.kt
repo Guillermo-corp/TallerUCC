@@ -88,6 +88,7 @@ fun NotificationPage(
                             message = notification["message"] as String,
                             timestamp = notification["timestamp"] as Timestamp,
                             isRead = notification["read"] as Boolean,
+                            communityLogo = notification["imageUrl"] as? String, // Corregido aquí
                             onClick = {
                                 notificationViewModel.markNotificationAsRead(notification["id"] as String)
                             }

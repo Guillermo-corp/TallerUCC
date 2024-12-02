@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.tallerucc.ui.theme.DarkGrey
 import com.example.tallerucc.ui.theme.LightBlue
 import com.example.tallerucc.ui.theme.Typography
@@ -28,6 +29,7 @@ fun NotificationCard(
     message: String,
     timestamp: Timestamp,
     isRead: Boolean,
+    communityLogo: String?, // Agregar el logo de la comunidad
     onClick: () -> Unit
 ) {
     val formattedDate = remember(timestamp) {
@@ -42,42 +44,67 @@ fun NotificationCard(
             .clickable { onClick() },
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isRead) Color.LightGray.copy(alpha = 0.5f) else Color.White
+            containerColor = if (isRead) Color.LightGray else Color.White
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Título
-            Text(
-                text = title,
-                style = Typography.titleSmall,
-                fontSize = 16.sp,
-                color = if (isRead) DarkGrey.copy(alpha = 0.8f) else LightBlue,
-                fontWeight = FontWeight.Bold
-            )
+            // Logo de la comunidad
+            if (communityLogo != null) {
+                AsyncImage(
+                    model = communityLogo,
+                    contentDescription = "Logo de la comunidad",
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(end = 8.dp)
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(end = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Logo",
+                        style = Typography.bodySmall,
+                        fontSize = 12.sp,
+                        color = DarkGrey
+                    )
+                }
+            }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Mensaje
-            Text(
-                text = message,
-                style = Typography.bodySmall,
-                fontSize = 14.sp,
-                color = DarkGrey.copy(alpha = 0.8f)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Fecha
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+            // Información de la notificación
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
+                // Título
+                Text(
+                    text = title,
+                    style = Typography.titleSmall,
+                    fontSize = 16.sp,
+                    color = if (isRead) DarkGrey.copy(alpha = 0.8f) else LightBlue,
+                    fontWeight = FontWeight.Bold
+                )
+
+                // Mensaje
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = message,
+                    style = Typography.bodySmall,
+                    fontSize = 14.sp,
+                    color = DarkGrey.copy(alpha = 0.8f)
+                )
+
+                // Fecha
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = formattedDate,
                     style = Typography.bodySmall,
