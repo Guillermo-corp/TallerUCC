@@ -79,6 +79,7 @@ dependencies {
     implementation (libs.json) // Para manejar respuestas JSON
     implementation (libs.coil.kt.coil.compose) // Para cargar imágenes en Jetpack Compose
 
+    implementation (libs.google.accompanist.flowlayout)
 
 
 

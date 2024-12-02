@@ -125,6 +125,7 @@ class WorkshopRepository {
 fun uploadImageToImgur(
     imageUri: Uri,
     context: Context,
+    accessToken: String,
     onComplete: (String?) -> Unit
 ) {
     CoroutineScope(Dispatchers.IO).launch {
@@ -139,20 +140,23 @@ fun uploadImageToImgur(
                 return@launch
             }
 
-            println("Tamaño de la imagen en bytes: ${byteArray.size}")
+            println("Log: Tamaño de la imagen en bytes: ${byteArray.size}")
 
             val base64Image = Base64.encodeToString(byteArray, Base64.NO_WRAP)
-            println("Tamaño del string Base64: ${base64Image.length}")
+            println("Log: Tamaño del string Base64: ${base64Image.length}")
 
             val url = URL("https://api.imgur.com/3/image")
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "POST"
-            connection.setRequestProperty("Authorization", "Client-ID ${Constants.IMGUR_CLIENT_ID}")
+            connection.setRequestProperty("Authorization", "Bearer $accessToken")
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
             connection.doOutput = true
 
             val requestBody = "image=${Uri.encode(base64Image)}"
+            println("Log: RequestBody generado para la subida")
+
             connection.outputStream.write(requestBody.toByteArray(Charsets.UTF_8))
+            println("Log: Request enviado a la URL: $url")
 
             val responseCode = connection.responseCode
             val responseMessage = if (responseCode == 200) {
@@ -161,11 +165,13 @@ fun uploadImageToImgur(
                 connection.errorStream?.bufferedReader()?.use { it.readText() }
             }
 
-            println("Código de respuesta: $responseCode, Respuesta: $responseMessage")
+            println("Log: Código de respuesta: $responseCode")
+            println("Log: Respuesta del servidor: $responseMessage")
 
             if (responseCode == 200) {
                 val jsonObject = JSONObject(responseMessage!!)
                 val imageUrl = jsonObject.getJSONObject("data").getString("link")
+                println("Log: Imagen subida correctamente. URL de la imagen: $imageUrl")
                 withContext(Dispatchers.Main) {
                     onComplete(imageUrl)
                 }
@@ -183,6 +189,7 @@ fun uploadImageToImgur(
         }
     }
 }
+
 
 
 

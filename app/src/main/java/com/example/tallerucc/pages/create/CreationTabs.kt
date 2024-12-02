@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.SelectableChipColors
@@ -45,18 +47,16 @@ fun CreationTabs(
 
 @Composable
 fun CreationChips(
-    selectedOption: String,
+    options: List<String>,
+    selectedOption: String = "Comunidad",
     onOptionSelected: (String) -> Unit
 ) {
-    val options = listOf("Taller", "Comunidad", "Noticia", "Publicación")
-
-    Row(
+    LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
-            .padding(8.dp),
-
+            .padding(8.dp)
     ) {
-        options.forEach { option ->
+        items(options) { option ->
             FilterChip(
                 selected = selectedOption == option,
                 onClick = { onOptionSelected(option) },
@@ -75,4 +75,6 @@ fun CreationChips(
         }
     }
 }
+
+
 

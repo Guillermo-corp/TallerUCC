@@ -17,7 +17,9 @@ import com.example.tallerucc.pages.workshops.WorkshopDetailPage
 import com.example.tallerucc.pages.workshops.WorkshopsByCategoryPage
 import com.example.tallerucc.pages.workshops.WorkshopsCategoriesPage
 import com.example.tallerucc.viewModel.AuthViewModel
+import com.example.tallerucc.viewModel.CommunityViewModel
 import com.example.tallerucc.viewModel.CreateViewModel
+import com.example.tallerucc.viewModel.HomeViewModel
 import com.example.tallerucc.viewModel.NavigationViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -25,7 +27,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 fun MyAppNavigation(
     modifier: Modifier = Modifier,
     authViewModel: AuthViewModel,
-    navigationViewModel: NavigationViewModel = viewModel()
+    navigationViewModel: NavigationViewModel = viewModel(),
+    homeViewModel: HomeViewModel = viewModel()
 ) {
     val navController = rememberNavController()
     val selectedIndex by navigationViewModel.selectedIndex.collectAsState()
@@ -50,11 +53,29 @@ fun MyAppNavigation(
             VerificationPendingPage(navController = navController, authViewModel = authViewModel)
         }
         composable("home") {
-            HomePage(navController = navController, authViewModel = authViewModel, navigationViewModel = navigationViewModel)
+            HomePage(navController = navController, homeViewModel = homeViewModel, navigationViewModel = navigationViewModel)
         }
         composable("communities") {
-            CommunitiesPage(navController = navController, authViewModel = authViewModel, navigationViewModel = navigationViewModel)
+            val communityViewModel: CommunityViewModel = viewModel() // Use viewModel()
+            CommunitiesPage(
+                navController = navController,
+                communityViewModel = communityViewModel,
+                navigationViewModel = navigationViewModel
+            )
         }
+        composable("communityDetail/{communityId}") { backStackEntry ->
+            val communityId = backStackEntry.arguments?.getString("communityId")
+            if (communityId != null) {
+                val communityViewModel: CommunityViewModel = viewModel() // Usa el ViewModel existente
+                CommunityDetailsPage(
+                    navController = navController,
+                    communityId = communityId,
+                    communityViewModel = communityViewModel,
+                    navigationViewModel = navigationViewModel
+                )
+            }
+        }
+
         composable("workshops") {
             WorkshopsCategoriesPage(
                 navController = navController,

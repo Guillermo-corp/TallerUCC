@@ -18,7 +18,7 @@ fun FloatingActionButtonCustom(
 ) {
     FloatingActionButton(
         modifier = modifier
-            .padding(0.dp)
+            .padding(end = 3.dp)
             .size(75.dp),
         onClick = { onFabClick() },
         containerColor = MaterialTheme.colorScheme.primary,

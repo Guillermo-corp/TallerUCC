@@ -31,6 +31,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+
     fun checkVerificationStatus() {
         auth.currentUser?.reload()?.addOnCompleteListener { reloadTask ->
             if (reloadTask.isSuccessful) {
@@ -39,7 +40,7 @@ class AuthViewModel : ViewModel() {
 //                    navController.navigate("home") // Navigate to home if verified
                 } else {
                     // Show a message to the user that verification is still pending
-                    _authState.value = AuthState.Error("Email verification is still pending")
+                    _authState.value = AuthState.Error("Verificación de correo electrónico todavía pendiente.")
                 }
             } else {
                 // Handle error
@@ -97,7 +98,7 @@ class AuthViewModel : ViewModel() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val userId = task.result?.user?.uid ?: return@addOnCompleteListener
-                    Log.d("AuthViewModel", "Signup successful for email: $email")
+                    Log.d("AuthViewModel", "Signup successful for email: $email (userId: $userId)")
 
                     // Send verification email
                     auth.currentUser?.sendEmailVerification()
@@ -108,7 +109,10 @@ class AuthViewModel : ViewModel() {
                                 // Create user document in Firestore
                                 val userData = mapOf(
                                     "email" to email,
-                                    "roles" to listOf("usuario") // Default role
+                                    "roles" to listOf("usuario"),
+                                    "followedCommunities" to emptyList<String>(),
+                                    "communitiesCreated" to emptyList<String>(),
+                                    "registeredWorkshops" to emptyList<String>(),// Default role
                                 )
 
                                 FirebaseFirestore.getInstance()
@@ -116,7 +120,7 @@ class AuthViewModel : ViewModel() {
                                     .document(userId)
                                     .set(userData)
                                     .addOnSuccessListener {
-                                        Log.d("AuthViewModel", "User document created in Firestore for $email")
+                                        Log.d("AuthViewModel", "User document created in Firestore for $email (userId: $userId)")
                                         _authState.value = AuthState.VerificationPending
                                     }
                                     .addOnFailureListener { e ->

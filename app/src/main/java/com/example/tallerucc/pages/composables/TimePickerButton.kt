@@ -2,12 +2,14 @@ package com.example.tallerucc.pages.composables
 
 import android.app.TimePickerDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.example.tallerucc.ui.theme.LightBlue
 import com.example.tallerucc.ui.theme.Typography
 import java.util.Locale
 
@@ -19,10 +21,15 @@ fun TimePickerButton(
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
-    Button(onClick = { showDialog = true }) {
+    Button(
+        onClick = { showDialog = true },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = LightBlue,
+        )
+    ) {
         Text(
             text = selectedTime?.let { formatTime(it) } ?: text,
-            style = Typography.bodyMedium
+            style = Typography.titleSmall
         )
     }
 

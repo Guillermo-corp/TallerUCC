@@ -19,13 +19,16 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExposedDropdownMenuDefaults.outlinedTextFieldColors
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -62,6 +65,7 @@ import com.example.tallerucc.repository.uploadImageToImgur
 import com.example.tallerucc.ui.theme.DarkBlue
 import com.example.tallerucc.ui.theme.DarkGrey
 import com.example.tallerucc.ui.theme.LightBlue
+import com.example.tallerucc.ui.theme.LightGrey
 import com.example.tallerucc.ui.theme.Typography
 import com.example.tallerucc.ui.theme.White
 import com.example.tallerucc.viewModel.CreateViewModel
@@ -95,7 +99,7 @@ fun WorkshopForm(navController: NavController, createViewModel: CreateViewModel)
         modifier = Modifier.padding(horizontal = 16.dp)
     )
 
-    Spacer(modifier = Modifier.height(8.dp))
+   Spacer(modifier = Modifier.height(0.dp))
 
     //    // Selector de categorías
 //    Text("Selecciona una Categoría:", style = MaterialTheme.typography.bodyMedium)
@@ -192,7 +196,12 @@ fun WorkshopForm(navController: NavController, createViewModel: CreateViewModel)
         maxLines = 5
     )
 
-    Spacer(modifier = Modifier.height(16.dp))
+//    Spacer(modifier = Modifier.height(16.dp))
+    HorizontalDivider(
+        color = LightBlue.copy(alpha = 0.2f),
+        thickness = 1.dp,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+    )
 
     // Selector de imágenes
     ImagePickerButton { uri ->
@@ -258,7 +267,7 @@ fun WorkshopForm(navController: NavController, createViewModel: CreateViewModel)
 
             if (imagesToUpload.isNotEmpty()) {
                 imagesToUpload.forEach { uri ->
-                    uploadImageToImgur(uri, context) { imageUrl ->
+                    createViewModel.uploadImage(uri, context) { imageUrl ->
                         if (imageUrl != null) {
                             uploadedImageUrls.add(imageUrl)
                             uploadedImagesSet.add(uri) // Marcar como subida
@@ -294,12 +303,18 @@ fun WorkshopForm(navController: NavController, createViewModel: CreateViewModel)
         enabled = selectedImageUris.isNotEmpty()
     ) {
         Text(
-            text = "Subir Imágenes",
-            style = Typography.bodyMedium
+            text = "Confirmar Imágenes",
+            style = Typography.titleSmall
         )
     }
 
-    Spacer(modifier = Modifier.height(16.dp))
+
+//    Spacer(modifier = Modifier.height(16.dp))
+    HorizontalDivider(
+        color = LightBlue.copy(alpha = 0.2f),
+        thickness = 1.dp,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+    )
 
     ExposedDropdownMenuBox(
         expanded = isDayDropdownExpanded,
@@ -381,6 +396,11 @@ fun WorkshopForm(navController: NavController, createViewModel: CreateViewModel)
     Button(
         modifier = Modifier
             .padding(horizontal = 16.dp),
+//            .border(
+//                width = 1.dp,
+//                color = LightBlue,
+//                shape = RoundedCornerShape(24.dp)
+//            ),
         onClick = {
             if (selectedDay != "Selecciona un día" && startTime != null && endTime != null) {
                 schedule.add(
@@ -394,13 +414,23 @@ fun WorkshopForm(navController: NavController, createViewModel: CreateViewModel)
                 startTime = null
                 endTime = null
             }
-        }
+        },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = DarkBlue,
+        )
     ) {
         Text(
             text = "Agregar al Horario",
-            style = Typography.bodyLarge
+            style = Typography.titleSmall,
+//            color = LightBlue
         )
     }
+
+    HorizontalDivider(
+        color = LightBlue.copy(alpha = 0.2f),
+        thickness = 1.dp,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+    )
 
     // Lista de horarios agregados
     Text(
@@ -408,6 +438,7 @@ fun WorkshopForm(navController: NavController, createViewModel: CreateViewModel)
             .padding(horizontal = 24.dp),
         text = "Horarios Agregados:",
         style = Typography.bodyMedium,
+        color = DarkBlue
     )
     schedule.forEach { entry ->
         Text(
@@ -415,14 +446,20 @@ fun WorkshopForm(navController: NavController, createViewModel: CreateViewModel)
                 .padding(horizontal = 24.dp),
             text = "Día: ${entry["day"]}, Inicio: ${formatTime(entry["startTime"] as Long)}, Fin: ${formatTime(entry["endTime"] as Long)}",
             style = Typography.bodySmall,
+            color = DarkGrey
         )
     }
 
-    Spacer(modifier = Modifier.height(16.dp))
+//    Spacer(modifier = Modifier.height(16.dp))
+    HorizontalDivider(
+        color = LightBlue.copy(alpha = 0.2f),
+        thickness = 1.dp,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+    )
 
     // Botón para guardar
     Button(
-
+        shape = RoundedCornerShape(8.dp),
         onClick = {
             if (uploadedImageUrls.isNotEmpty() && selectedCategory != null) {
                 createViewModel.createWorkshop(
@@ -441,6 +478,9 @@ fun WorkshopForm(navController: NavController, createViewModel: CreateViewModel)
             .fillMaxWidth()
             .padding(bottom = 48.dp, start = 16.dp, end = 16.dp)
     ) {
-        Text("Crear Workshop")
+        Text(
+            text = "Crear Taller",
+            style = Typography.titleMedium
+        )
     }
 }
