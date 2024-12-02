@@ -59,8 +59,8 @@ fun HomePage(
 
     LaunchedEffect(authState.value) {
         if (authState.value is AuthState.Authenticated) {
-            homeViewModel.loadPostsForFeed()
             homeViewModel.loadLikedPosts()
+            homeViewModel.loadPostsForFeed()
             homeViewModel.loadCommunities()
         }
     }

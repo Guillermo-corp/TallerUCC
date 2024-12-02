@@ -7,11 +7,15 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.tallerucc.MainActivity
 import com.example.tallerucc.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 
 object NotificationHelper {
 
@@ -39,6 +43,35 @@ object NotificationHelper {
 
         notificationManager.notify(notificationId, notificationBuilder.build())
     }
+
+    fun updateDeviceToken(token: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            val db = FirebaseFirestore.getInstance()
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    val existingTokens = document.get("deviceTokens") as? List<String> ?: emptyList()
+                    if (!existingTokens.contains(token)) {
+                        db.collection("users").document(userId)
+                            .update("deviceTokens", FieldValue.arrayUnion(token))
+                            .addOnSuccessListener {
+                                Log.d("NotificationHelper", "Token actualizado para usuario $userId")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("NotificationHelper", "Error al actualizar token: ${e.message}")
+                            }
+                    } else {
+                        Log.d("NotificationHelper", "Token ya existe para el usuario $userId.")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("NotificationHelper", "Error al verificar tokens existentes: ${e.message}")
+                }
+        } else {
+            Log.e("NotificationHelper", "Usuario no autenticado. Token no actualizado.")
+        }
+    }
+
 }
 
 

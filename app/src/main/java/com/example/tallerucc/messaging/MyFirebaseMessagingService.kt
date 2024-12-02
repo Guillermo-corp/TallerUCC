@@ -16,14 +16,27 @@ import com.google.firebase.firestore.FirebaseFirestore
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import com.example.tallerucc.utils.NotificationHelper.updateDeviceToken
+import com.google.firebase.firestore.FieldValue
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("FCM", "New token: $token")
+
         saveTokenToFirestore(token)
+
+        // Actualizar el token si el usuario está autenticado
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            updateDeviceToken(token)
+        } else {
+            Log.e("FCM", "Usuario no autenticado. Token no se actualizó.")
+            // Si necesitas manejar tokens para usuarios no autenticados, guarda aquí
+        }
     }
+
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
@@ -51,8 +64,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             Log.e("FCM", "User is not authenticated, cannot save token.")
         }
     }
-
-
 
 }
 

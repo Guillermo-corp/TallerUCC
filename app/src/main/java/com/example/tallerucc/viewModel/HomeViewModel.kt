@@ -27,8 +27,8 @@ class HomeViewModel : ViewModel() {
         FirebaseAuth.getInstance().addAuthStateListener { auth ->
             if (auth.currentUser != null) {
                 viewModelScope.launch {
-                    loadPostsForFeed()
                     loadLikedPosts()
+                    loadPostsForFeed()
                     loadCommunities()
                 }
             }

@@ -7,12 +7,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
+import com.example.tallerucc.utils.NotificationHelper.updateDeviceToken
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
+
 
 class AuthViewModel : ViewModel() {
 
@@ -74,7 +76,7 @@ class AuthViewModel : ViewModel() {
 
                         _authState.value = AuthState.Authenticated
                         // Actualizar el token del dispositivo
-//                        updateDeviceTokenForUser()
+                        checkAndUpdateDeviceToken()
 
                     } else {
                         val errorMessage = "Please verify your email before logging in."
@@ -182,6 +184,23 @@ class AuthViewModel : ViewModel() {
                 }
             }
     }
+
+    fun checkAndUpdateDeviceToken() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                if (token != null) {
+                    updateDeviceToken(token)
+                    Log.d("AuthViewModel", "Token actualizado correctamente.")
+                } else {
+                    Log.e("AuthViewModel", "Error al obtener el token del dispositivo")
+                }
+            } else {
+                Log.e("AuthViewModel", "Error al completar la tarea del token", task.exception)
+            }
+        }
+    }
+
 
 
 }

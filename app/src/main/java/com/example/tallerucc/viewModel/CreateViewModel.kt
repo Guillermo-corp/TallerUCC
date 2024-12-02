@@ -325,7 +325,7 @@ class CreateViewModel : ViewModel() {
 
                 client.newCall(request).execute().use { response ->
                     if (response.isSuccessful) {
-                        Log.d("FCM", "Notificación enviada con éxito.")
+                        Log.d("FCM", "Notificación enviada con éxito a : $deviceToken")
                     } else {
                         Log.e("FCM", "Error al enviar notificación: ${response.body?.string()}")
                     }
