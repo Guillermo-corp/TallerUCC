@@ -7,10 +7,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
+import com.example.tallerucc.utils.NotificationHelper.updateDeviceToken
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
+
 
 class AuthViewModel : ViewModel() {
 
@@ -20,8 +24,13 @@ class AuthViewModel : ViewModel() {
     val authState: LiveData<AuthState> = _authState
 
     init {
-        checkAuthState()
+        auth.addAuthStateListener { firebaseAuth ->
+            val state = if (firebaseAuth.currentUser == null) "Unauthenticated" else "Authenticated"
+            Log.d("AuthViewModel", "AuthState changed: $state")
+            _authState.value = if (firebaseAuth.currentUser == null) AuthState.Unauthenticated else AuthState.Authenticated
+        }
     }
+
 
     fun checkAuthState() {
         if (auth.currentUser != null) {
@@ -31,6 +40,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+
     fun checkVerificationStatus() {
         auth.currentUser?.reload()?.addOnCompleteListener { reloadTask ->
             if (reloadTask.isSuccessful) {
@@ -39,7 +49,7 @@ class AuthViewModel : ViewModel() {
 //                    navController.navigate("home") // Navigate to home if verified
                 } else {
                     // Show a message to the user that verification is still pending
-                    _authState.value = AuthState.Error("Email verification is still pending")
+                    _authState.value = AuthState.Error("Verificación de correo electrónico todavía pendiente.")
                 }
             } else {
                 // Handle error
@@ -63,19 +73,24 @@ class AuthViewModel : ViewModel() {
                 if (task.isSuccessful) {
                     if (auth.currentUser?.isEmailVerified == true) {
                         Log.d("AuthViewModel", "Login successful for email: $email")
+
                         _authState.value = AuthState.Authenticated
+                        // Actualizar el token del dispositivo
+                        checkAndUpdateDeviceToken()
+
                     } else {
                         val errorMessage = "Please verify your email before logging in."
                         Log.e("AuthViewModel", errorMessage)
                         _authState.value = AuthState.Error(errorMessage)
                     }
                 } else {
-                    val errorMessage = handleAuthError(task.exception) // Centralización de errores
-                    Log.e("AuthViewModel", "Login failed: $errorMessage", task.exception) // Log error
+                    val errorMessage = handleAuthError(task.exception)
+                    Log.e("AuthViewModel", "Login failed: $errorMessage", task.exception)
                     _authState.value = AuthState.Error(errorMessage)
                 }
             }
     }
+
 
 
 
@@ -97,7 +112,7 @@ class AuthViewModel : ViewModel() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val userId = task.result?.user?.uid ?: return@addOnCompleteListener
-                    Log.d("AuthViewModel", "Signup successful for email: $email")
+                    Log.d("AuthViewModel", "Signup successful for email: $email (userId: $userId)")
 
                     // Send verification email
                     auth.currentUser?.sendEmailVerification()
@@ -108,7 +123,12 @@ class AuthViewModel : ViewModel() {
                                 // Create user document in Firestore
                                 val userData = mapOf(
                                     "email" to email,
-                                    "roles" to listOf("usuario") // Default role
+                                    "roles" to listOf("usuario"),
+                                    "followedCommunities" to emptyList<String>(),
+                                    "communitiesCreated" to emptyList<String>(),
+                                    "registeredWorkshops" to emptyList<String>(),// Default role
+                                    "likedPosts" to emptyList<String>(),
+                                    "deviceToken" to emptyList<String>()
                                 )
 
                                 FirebaseFirestore.getInstance()
@@ -116,7 +136,7 @@ class AuthViewModel : ViewModel() {
                                     .document(userId)
                                     .set(userData)
                                     .addOnSuccessListener {
-                                        Log.d("AuthViewModel", "User document created in Firestore for $email")
+                                        Log.d("AuthViewModel", "User document created in Firestore for $email (userId: $userId)")
                                         _authState.value = AuthState.VerificationPending
                                     }
                                     .addOnFailureListener { e ->
@@ -140,9 +160,11 @@ class AuthViewModel : ViewModel() {
 
 
     fun signout() {
+        Log.d("AuthViewModel", "Signout called")
         auth.signOut()
-        _authState.value = AuthState.Unauthenticated
+        checkAuthState()
     }
+
 
     fun forgotPassword(email: String) {
         // Check if the email is empty
@@ -162,6 +184,24 @@ class AuthViewModel : ViewModel() {
                 }
             }
     }
+
+    fun checkAndUpdateDeviceToken() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                if (token != null) {
+                    updateDeviceToken(token)
+                    Log.d("AuthViewModel", "Token actualizado correctamente.")
+                } else {
+                    Log.e("AuthViewModel", "Error al obtener el token del dispositivo")
+                }
+            } else {
+                Log.e("AuthViewModel", "Error al completar la tarea del token", task.exception)
+            }
+        }
+    }
+
+
 
 }
 

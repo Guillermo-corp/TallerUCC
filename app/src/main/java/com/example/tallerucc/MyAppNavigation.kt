@@ -7,6 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -17,17 +18,26 @@ import com.example.tallerucc.pages.workshops.WorkshopDetailPage
 import com.example.tallerucc.pages.workshops.WorkshopsByCategoryPage
 import com.example.tallerucc.pages.workshops.WorkshopsCategoriesPage
 import com.example.tallerucc.viewModel.AuthViewModel
+import com.example.tallerucc.viewModel.CommunityViewModel
+import com.example.tallerucc.viewModel.CreateViewModel
+import com.example.tallerucc.viewModel.HomeViewModel
 import com.example.tallerucc.viewModel.NavigationViewModel
+import com.example.tallerucc.viewModel.NotificationViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun MyAppNavigation(
     modifier: Modifier = Modifier,
     authViewModel: AuthViewModel,
-    navigationViewModel: NavigationViewModel = viewModel()
-) {
-    val navController = rememberNavController()
+    navController: androidx.navigation.NavHostController, // Asegurarse de que sea NavHostController
+    navigationViewModel: NavigationViewModel = viewModel(),
+    homeViewModel: HomeViewModel = viewModel(),
+
+    ) {
+
     val selectedIndex by navigationViewModel.selectedIndex.collectAsState()
+    val notificationViewModel: NotificationViewModel = viewModel()
+
 
     // Observa los cambios en la navegación
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -36,6 +46,7 @@ fun MyAppNavigation(
     // Llama al ViewModel para actualizar el índice según la ruta actual
     LaunchedEffect(currentRoute) {
         navigationViewModel.updateSelectedIndexBasedOnRoute(currentRoute)
+        notificationViewModel.loadUnreadNotificationsCount()
     }
 
     NavHost(navController = navController, startDestination = "login") {
@@ -49,15 +60,45 @@ fun MyAppNavigation(
             VerificationPendingPage(navController = navController, authViewModel = authViewModel)
         }
         composable("home") {
-            HomePage(navController = navController, authViewModel = authViewModel, navigationViewModel = navigationViewModel)
+            HomePage(navController = navController, homeViewModel = homeViewModel, navigationViewModel = navigationViewModel, authViewModel = AuthViewModel(), notificationViewModel = NotificationViewModel())
         }
         composable("communities") {
-            CommunitiesPage(navController = navController, authViewModel = authViewModel, navigationViewModel = navigationViewModel)
+            val communityViewModel: CommunityViewModel = viewModel() // Use viewModel()
+            CommunitiesPage(
+                navController = navController,
+                communityViewModel = communityViewModel,
+                navigationViewModel = navigationViewModel,
+                authViewModel = AuthViewModel(),
+                notificationViewModel = NotificationViewModel()
+            )
         }
+        composable("communityDetail/{communityId}") { backStackEntry ->
+            val communityId = backStackEntry.arguments?.getString("communityId")
+            if (communityId != null) {
+                val communityViewModel: CommunityViewModel = viewModel() // Usa el ViewModel existente
+                CommunityDetailsPage(
+                    navController = navController,
+                    communityId = communityId,
+                    communityViewModel = communityViewModel,
+                    navigationViewModel = navigationViewModel,
+                    notificationViewModel = NotificationViewModel()
+                )
+            }
+        }
+
         composable("workshops") {
             WorkshopsCategoriesPage(
                 navController = navController,
-                navigationViewModel = navigationViewModel
+                navigationViewModel = navigationViewModel,
+                authViewModel = AuthViewModel(),
+                notificationViewModel = NotificationViewModel()
+            )
+        }
+        composable("createPage") {
+            CreatePage(
+                navController = navController,
+                createViewModel = CreateViewModel(),
+                authViewModel = AuthViewModel()
             )
         }
         composable("workshops/{categoryId}") { backStackEntry ->
@@ -67,7 +108,9 @@ fun MyAppNavigation(
                 WorkshopsByCategoryPage(
                     navController = navController,
                     categoryReference = categoryReference,
-                    navigationViewModel = navigationViewModel
+                    navigationViewModel = navigationViewModel,
+                    authViewModel = AuthViewModel(),
+                    notificationViewModel = NotificationViewModel()
                 )
             }
         }
@@ -79,14 +122,22 @@ fun MyAppNavigation(
                 WorkshopDetailPage(
                     navController = navController,
                     workshopReference = workshopReference,
-                    navigationViewModel = navigationViewModel
+                    navigationViewModel = navigationViewModel,
+                    authViewModel = AuthViewModel(),
+                    notificationViewModel = NotificationViewModel()
                 )
             }
         }
 
         composable("notifications") {
-            NotificationPage(navController = navController, authViewModel = authViewModel, navigationViewModel = navigationViewModel)
+            NotificationPage(
+                navController = navController,
+                notificationViewModel = notificationViewModel,
+                navigationViewModel = navigationViewModel,
+                authViewModel = AuthViewModel()
+            )
         }
+
     }
 }
 

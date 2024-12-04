@@ -24,7 +24,9 @@ import com.example.tallerucc.pages.composables.Header
 import com.example.tallerucc.pages.composables.WorkshopItem
 import com.example.tallerucc.repository.WorkshopRepository
 import com.example.tallerucc.ui.theme.Typography
+import com.example.tallerucc.viewModel.AuthViewModel
 import com.example.tallerucc.viewModel.NavigationViewModel
+import com.example.tallerucc.viewModel.NotificationViewModel
 import com.example.tallerucc.viewModel.WorkshopViewModel
 import com.example.tallerucc.viewModel.WorkshopViewModelFactory
 import com.google.firebase.firestore.DocumentReference
@@ -35,7 +37,9 @@ fun WorkshopsByCategoryPage(
     navController: NavController,
     categoryReference: DocumentReference,
     navigationViewModel: NavigationViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel,
+    notificationViewModel: NotificationViewModel,
 ) {
     val repository = WorkshopRepository()
     val viewModel: WorkshopViewModel = viewModel(factory = WorkshopViewModelFactory(repository))
@@ -49,28 +53,40 @@ fun WorkshopsByCategoryPage(
     Scaffold(
         modifier = modifier,
         topBar = {
-            Header(title = "Talleres de ${categoryReference.id}")
+            Header(
+                title = "Tu Taller UCC",
+                showBackIcon = true,
+                onBackClick = { navController.popBackStack() }, // Navegar hacia atrás
+                showLogoutIcon = true,
+                onLogoutClick = {
+                    authViewModel.signout() // Cerrar sesión
+                    navController.navigate("login") { // Redirigir a la pantalla de inicio de sesión
+                        popUpTo(0) // Limpia la pila de navegación
+                    }
+                }
+            )
         },
         bottomBar = {
             BottomNavBar(
                 navController = navController,
                 navItems = navItems,
                 selectedIndex = selectedIndex,
-                onItemSelected = { navigationViewModel.selectIndex(it) }
+                onItemSelected = { navigationViewModel.selectIndex(it) },
+                unreadNotificationsCount = notificationViewModel.unreadNotificationsCount.collectAsState().value
             )
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(16.dp)
+                .padding(0.dp)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
             if (workshops.isNotEmpty()) {
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
                     items(workshops) { workshop ->
                         WorkshopItem(

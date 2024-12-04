@@ -28,6 +28,7 @@ import com.example.tallerucc.ui.theme.DarkBlue
 import com.example.tallerucc.ui.theme.LightBlue
 import com.example.tallerucc.viewModel.AuthState
 import com.example.tallerucc.viewModel.AuthViewModel
+import com.example.tallerucc.viewModel.HomeViewModel
 
 @Composable
 fun LoginPage(
@@ -47,12 +48,18 @@ fun LoginPage(
 
     LaunchedEffect(authState.value) {
         when (authState.value) {
-            is AuthState.Authenticated -> navController.navigate("home")
-            is AuthState.Error -> Toast.makeText(
-                context,
-                (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT
-            ).show()
-
+            is AuthState.Authenticated -> {
+                navController.navigate("home") {
+                    popUpTo(0) // Limpia la pila para evitar regresar a login
+                }
+            }
+            is AuthState.Error -> {
+                Toast.makeText(
+                    context,
+                    (authState.value as AuthState.Error).message,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
             else -> Unit
         }
     }

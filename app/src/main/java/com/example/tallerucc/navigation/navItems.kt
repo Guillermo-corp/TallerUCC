@@ -10,7 +10,7 @@ val navItems = listOf(
     NavItem("Inicio", Icons.Default.Home, "home"),
     NavItem("Comunidades", Icons.Default.Favorite, "communities"),
     NavItem("Talleres", Icons.Default.Star, "workshops"),
-    NavItem("Notificaciones", Icons.Default.Notifications, "notifications", 5)
+    NavItem("Notificaciones", Icons.Default.Notifications, "notifications")
 )
 
 
