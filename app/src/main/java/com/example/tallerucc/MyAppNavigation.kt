@@ -134,7 +134,8 @@ fun MyAppNavigation(
                 navController = navController,
                 notificationViewModel = notificationViewModel,
                 navigationViewModel = navigationViewModel,
-                authViewModel = AuthViewModel()
+                authViewModel = AuthViewModel(),
+                communityViewModel = CommunityViewModel()
             )
         }
 

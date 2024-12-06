@@ -1,5 +1,6 @@
 package com.example.tallerucc.pages.composables
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -14,11 +15,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import com.example.tallerucc.R
 import com.example.tallerucc.ui.theme.DarkGrey
 import com.example.tallerucc.ui.theme.LightBlue
 import com.example.tallerucc.ui.theme.Typography
@@ -32,6 +37,7 @@ fun NotificationCard(
     message: String,
     timestamp: Timestamp,
     isRead: Boolean,
+    isOfficial: Boolean, // Nuevo parámetro para determinar si la comunidad es oficial
     communityLogo: String?, // Agregar el logo de la comunidad
     communityId: String?, // Nuevo campo
     onClick: () -> Unit
@@ -105,14 +111,33 @@ fun NotificationCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Título
-                Text(
-                    text = title,
-                    style = Typography.titleSmall,
-                    fontSize = 16.sp,
-                    color = if (isRead) DarkGrey.copy(alpha = 0.8f) else LightBlue,
-                    fontWeight = FontWeight.Bold
-                )
+
+                Row (
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Título
+                    Text(
+                        text = title,
+                        style = Typography.titleSmall,
+                        fontSize = 16.sp,
+                        color = if (isRead) DarkGrey.copy(alpha = 0.8f) else LightBlue,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    // Ícono de oficial
+                    if (isOfficial) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_verified),
+                            contentDescription = "Oficial",
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(bottom = 1.dp),
+                            colorFilter = ColorFilter.tint(LightBlue)
+                        )
+                    }
+
+                }
 
                 // Mensaje
                 Spacer(modifier = Modifier.height(4.dp))
