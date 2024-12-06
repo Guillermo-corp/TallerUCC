@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,9 +25,11 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,6 +62,7 @@ fun PostCard(
     userId: String,
     isLiked: Boolean,
     isCommunityOfficial: Boolean, // Indicador adicional para comunidades oficiales
+    createdAt: String, // Nuevo parámetro
     onLikeToggle: (String, Boolean) -> Unit
 ) {
     val postId = post["postId"] as? String ?: return
@@ -130,11 +134,30 @@ fun PostCard(
                             )
                         }
                     }
-                    Text(
-                        text = "by ${post["authorId"] as String}",
-                        style = Typography.bodySmall,
-                        color = DarkGrey.copy(alpha = 0.6f)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+
+                    ) {
+                        Text(
+                            text = "by ${post["authorId"] as String}",
+                            style = Typography.bodySmall,
+                            color = DarkGrey.copy(alpha = 0.6f)
+                        )
+//                        Spacer(modifier = Modifier.width(6.dp))
+                        VerticalDivider(
+                            thickness = 1.dp,
+                            color = LightGrey.copy(alpha = 0.4f),
+                            modifier = Modifier
+                                .height(12.dp)
+                                .padding(horizontal = 6.dp) // Establece la altura del divisor
+                        )
+
+                        Text(
+                            text = createdAt,
+                            style = Typography.bodySmall,
+                            color = DarkGrey.copy(alpha = 0.6f)
+                        )
+                    }
                 }
             }
 
@@ -159,7 +182,9 @@ fun PostCard(
                 val pagerState = rememberPagerState { imageUrls.size }
                 val maxVisibleDots = 4 // Máximo de puntos visibles
 
-                Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)) {
                     // Carrusel de imágenes
                     HorizontalPager(
                         state = pagerState,
@@ -199,7 +224,9 @@ fun PostCard(
                                         .size(if (isActive) 8.dp else 6.dp)
                                         .clip(CircleShape)
                                         .background(
-                                            if (isActive) White.copy(alpha = 0.9f) else White.copy(alpha = 0.2f)
+                                            if (isActive) White.copy(alpha = 0.9f) else White.copy(
+                                                alpha = 0.2f
+                                            )
                                         )
                                 )
                             }

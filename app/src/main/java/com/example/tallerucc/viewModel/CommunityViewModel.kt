@@ -156,14 +156,22 @@ class CommunityViewModel : ViewModel() {
                         this["postId"] = document.id // Agregar el ID del documento como "postId"
                     } ?: emptyMap()
                 }
-                println("Posts retrieved for community $communityName: $posts")
-                onComplete(posts)
+
+                // Ordenar los posts: primero por fecha (`createdAt`), luego por likes (`likesCount`)
+                val sortedPosts = posts.sortedWith(
+                    compareByDescending<Map<String, Any>> { it["createdAt"] as? Long ?: 0L }
+                        .thenByDescending { it["likesCount"] as? Long ?: 0L }
+                )
+
+                println("Posts retrieved and sorted for community $communityName: $sortedPosts")
+                onComplete(sortedPosts)
             }
             .addOnFailureListener { e ->
                 println("Error retrieving posts for community $communityName: ${e.message}")
                 onComplete(emptyList())
             }
     }
+
 
 
 

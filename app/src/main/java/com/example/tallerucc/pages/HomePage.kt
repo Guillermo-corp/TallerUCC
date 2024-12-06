@@ -32,7 +32,9 @@ import com.example.tallerucc.viewModel.NavigationViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 import androidx.compose.foundation.lazy.rememberLazyListState
+import com.example.tallerucc.utils.formatTimestamp
 import com.example.tallerucc.viewModel.NotificationViewModel
+import com.google.firebase.Timestamp
 
 @Composable
 fun HomePage(
@@ -129,16 +131,21 @@ fun HomePage(
                         val postId = post["postId"] as? String ?: return@items
                         val isLiked = homeViewModel.likedPosts.collectAsState().value.contains(postId)
                         val likesCount = (post["likesCount"] as? Long) ?: 0
+                        val createdAt = post["createdAt"] as? Timestamp
 
                         val isCommunityOfficial = post["communityName"]?.let { communityName ->
                             homeViewModel.isCommunityOfficial(communityName.toString())
                         } ?: false
+
+                        // Formatear la fecha
+                        val formattedDate = formatTimestamp(createdAt)
 
                         PostCard(
                             post = post,
                             userId = FirebaseAuth.getInstance().currentUser?.uid ?: "",
                             isLiked = isLiked,
                             isCommunityOfficial = isCommunityOfficial,// Indicador adicional para comunidades oficiales
+                            createdAt = formattedDate, // Pasa la fecha formateada
                             onLikeToggle = { postId, isNowLiked ->
                                 homeViewModel.toggleLike(postId, isNowLiked)
                             }
