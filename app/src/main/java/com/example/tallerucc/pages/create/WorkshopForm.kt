@@ -66,6 +66,7 @@ import com.example.tallerucc.ui.theme.DarkBlue
 import com.example.tallerucc.ui.theme.DarkGrey
 import com.example.tallerucc.ui.theme.LightBlue
 import com.example.tallerucc.ui.theme.LightGrey
+import com.example.tallerucc.ui.theme.LightRed
 import com.example.tallerucc.ui.theme.Typography
 import com.example.tallerucc.ui.theme.White
 import com.example.tallerucc.viewModel.CreateViewModel
@@ -440,14 +441,41 @@ fun WorkshopForm(navController: NavController, createViewModel: CreateViewModel)
         style = Typography.bodyMedium,
         color = DarkBlue
     )
-    schedule.forEach { entry ->
-        Text(
+    schedule.forEachIndexed { index, entry ->
+        Row(
             modifier = Modifier
-                .padding(horizontal = 24.dp),
-            text = "Día: ${entry["day"]}, Inicio: ${formatTime(entry["startTime"] as Long)}, Fin: ${formatTime(entry["endTime"] as Long)}",
-            style = Typography.bodySmall,
-            color = DarkGrey
-        )
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Información del horario
+            Column {
+                Text(
+                    text = "Día: ${entry["day"]}, Inicio: ${formatTime(entry["startTime"] as Long)}, Fin: ${formatTime(entry["endTime"] as Long)}",
+                    style = Typography.bodySmall,
+                    color = DarkGrey
+                )
+            }
+
+            // Botón para eliminar el horario
+            Button(
+                onClick = {
+                    schedule.removeAt(index) // Eliminar el horario de la lista
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = LightRed
+                ),
+                shape = RoundedCornerShape(4.dp),
+                contentPadding = ButtonDefaults.ContentPadding
+            ) {
+                Text(
+                    text = "Eliminar",
+                    style = Typography.bodySmall,
+                    color = White
+                )
+            }
+        }
     }
 
 //    Spacer(modifier = Modifier.height(16.dp))
@@ -461,7 +489,7 @@ fun WorkshopForm(navController: NavController, createViewModel: CreateViewModel)
     Button(
         shape = RoundedCornerShape(8.dp),
         onClick = {
-            if (uploadedImageUrls.isNotEmpty() && selectedCategory != null) {
+            if (uploadedImageUrls.isNotEmpty() && selectedCategory != null && schedule.isNotEmpty()) {
                 createViewModel.createWorkshop(
                     name = name,
                     description = description,

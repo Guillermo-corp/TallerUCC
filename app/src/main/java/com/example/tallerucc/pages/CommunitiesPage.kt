@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,7 +27,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,6 +39,7 @@ import androidx.navigation.NavController
 import com.example.tallerucc.navigation.navItems
 import com.example.tallerucc.pages.composables.BottomNavBar
 import com.example.tallerucc.pages.composables.CommunityCard
+import com.example.tallerucc.pages.composables.CommunitySearchBar
 import com.example.tallerucc.pages.composables.FloatingActionButtonCustom
 import com.example.tallerucc.pages.composables.Header
 import com.example.tallerucc.ui.theme.DarkBlue
@@ -60,23 +64,36 @@ fun CommunitiesPage(
 ) {
     val selectedIndex by navigationViewModel.selectedIndex.collectAsState()
 
-    val communities by communityViewModel.communities.collectAsState()
+    val allCommunities by communityViewModel.communities.collectAsState()
     val tags = remember { mutableStateListOf<String>() } // Lista de etiquetas seleccionadas
     val predefinedTags = listOf("Oficial", "Deportes", "Arte", "Cultura", "Tecnología", "Educación") // Etiquetas predefinidas
 
+    var searchQuery by remember { mutableStateOf("") } // Estado de la barra de búsqueda
 
-    Scaffold (
+    // Comunidades filtradas por búsqueda y etiquetas
+    val filteredCommunities = allCommunities.filter { community ->
+        val matchesSearch = community.name.contains(searchQuery, ignoreCase = true)
+        val matchesTags = tags.isEmpty() || tags.any { tag ->
+            when (tag) {
+                "Oficial" -> community.isOfficial
+                else -> community.tags.contains(tag)
+            }
+        }
+        matchesSearch && matchesTags
+    }
+
+    Scaffold(
         modifier = modifier,
         topBar = {
             Header(
                 title = "Tu Taller UCC",
                 showBackIcon = true,
-                onBackClick = { navController.popBackStack() }, // Navegar hacia atrás
+                onBackClick = { navController.popBackStack() },
                 showLogoutIcon = true,
                 onLogoutClick = {
-                    authViewModel.signout() // Cerrar sesión
-                    navController.navigate("login") { // Redirigir a la pantalla de inicio de sesión
-                        popUpTo(0) // Limpia la pila de navegación
+                    authViewModel.signout()
+                    navController.navigate("login") {
+                        popUpTo(0)
                     }
                 }
             )
@@ -91,7 +108,6 @@ fun CommunitiesPage(
             )
         },
         floatingActionButton = {
-            //FAB personalizado
             FloatingActionButtonCustom(
                 onFabClick = {
                     navController.navigate("createPage")
@@ -105,13 +121,24 @@ fun CommunitiesPage(
                 .padding(0.dp)
                 .fillMaxSize()
         ) {
-            // Filtro por etiquetas
-            Text(
-                text = "Filtrar",
-                style = Typography.titleSmall,
-                modifier = Modifier.padding(bottom = 8.dp, top = 16.dp, start = 16.dp),
-                color = DarkBlue
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Barra de búsqueda
+            CommunitySearchBar(
+                followedCommunities = allCommunities,
+                onCommunitySelected = { selectedCommunity ->
+                    searchQuery = selectedCommunity.name
+                }
             )
+
+//            // Filtro por etiquetas
+//            Text(
+//                text = "Filtrar",
+//                style = Typography.titleSmall,
+//                modifier = Modifier.padding(bottom = 8.dp, top = 16.dp, start = 16.dp),
+//                color = DarkBlue
+//            )
             LazyRow(
                 modifier = Modifier
                     .padding(start = 16.dp)
@@ -153,23 +180,17 @@ fun CommunitiesPage(
                 }
             }
 
+            HorizontalDivider(
+                color = LightBlue.copy(alpha = 0.2f),
+                thickness = 1.dp,
+                modifier = Modifier.padding(start = 0.dp, end = 0.dp, top = 12.dp, bottom = 20.dp)
+            )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(0.dp))
 
             // Lista de comunidades filtradas
             LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                items(communities.filter { community ->
-                    if (tags.isEmpty()) {
-                        true // Mostrar todas las comunidades si no hay filtros seleccionados
-                    } else {
-                        tags.any { tag ->
-                            when (tag) {
-                                "Oficial" -> community.isOfficial // Filtrar por comunidades oficiales
-                                else -> community.tags.contains(tag) // Filtrar por las etiquetas estándar
-                            }
-                        }
-                    }
-                }) { community ->
+                items(filteredCommunities) { community ->
                     val isFollowed = communityViewModel.followedCommunities.collectAsState().value.contains(community.name)
                     CommunityCard(
                         community = community,
@@ -179,7 +200,7 @@ fun CommunitiesPage(
                     )
                 }
             }
-
         }
     }
 }
+

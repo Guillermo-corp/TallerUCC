@@ -39,7 +39,7 @@ fun TimePickerButton(
             onTimeSelected = { selectedTime ->
                 onTimeSelected(selectedTime)
                 showDialog = false // Cerrar el diálogo después de seleccionar
-            }
+            },
         )
     }
 }

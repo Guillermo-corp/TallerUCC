@@ -243,7 +243,13 @@ fun PostForm(navController: NavController, createViewModel: CreateViewModel) {
     Button(
         onClick = {
             if (title.isNotEmpty() && textContent.isNotEmpty()) {
-                if (uploadedImageUrls.isNotEmpty()) {
+                if (!isOfficial && selectedCommunityId.isNullOrEmpty()) {
+                    Toast.makeText(
+                        context,
+                        "Por favor, selecciona una comunidad antes de crear la publicación.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else if (uploadedImageUrls.isNotEmpty()) {
                     // Crear la publicación directamente
                     createViewModel.createPost(
                         context = context,
@@ -294,8 +300,6 @@ fun PostForm(navController: NavController, createViewModel: CreateViewModel) {
     ) {
         Text(text = "Crear Publicación")
     }
-
-
 
 }
 

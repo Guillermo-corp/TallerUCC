@@ -27,6 +27,7 @@ import com.example.tallerucc.pages.composables.NotificationCard
 import com.example.tallerucc.ui.theme.Typography
 import com.example.tallerucc.viewModel.AuthState
 import com.example.tallerucc.viewModel.AuthViewModel
+import com.example.tallerucc.viewModel.CommunityViewModel
 import com.example.tallerucc.viewModel.NavigationViewModel
 import com.example.tallerucc.viewModel.NotificationViewModel
 import com.google.firebase.Timestamp
@@ -37,10 +38,12 @@ fun NotificationPage(
     navController: NavController,
     notificationViewModel: NotificationViewModel,
     navigationViewModel: NavigationViewModel,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    communityViewModel: CommunityViewModel // Añadir este parámetro
 ) {
     val selectedIndex by navigationViewModel.selectedIndex.collectAsState()
     val notifications by notificationViewModel.notifications.collectAsState()
+    val communities by communityViewModel.communities.collectAsState() // Observa comunidades
 
     Scaffold(
         modifier = modifier,
@@ -84,7 +87,11 @@ fun NotificationPage(
             } else {
                 LazyColumn {
                     items(notifications) { notification ->
-                        val communityId = notification["communityId"] as? String // Puede ser nul
+                        val communityId = notification["communityId"] as? String // Puede ser null
+
+                        val isOfficial = communityId?.let { id ->
+                            communities.find { it.id == id }?.isOfficial == true
+                        } ?: false
 
                         NotificationCard(
                             title = notification["title"] as String,
@@ -93,6 +100,7 @@ fun NotificationPage(
                             isRead = notification["read"] as Boolean,
                             communityLogo = notification["imageUrl"] as? String,
                             communityId = notification["communityId"] as? String, // Nuevo campo
+                            isOfficial = isOfficial, // Pasar el estado de oficial
                             onClick = {
                                 notificationViewModel.markNotificationAsRead(notification["id"] as String)
                                 if (communityId != null) {
