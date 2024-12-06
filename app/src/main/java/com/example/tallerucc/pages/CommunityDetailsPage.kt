@@ -32,9 +32,11 @@ import com.example.tallerucc.navigation.navItems
 import com.example.tallerucc.pages.composables.BottomNavBar
 import com.example.tallerucc.pages.composables.CommunityHeader
 import com.example.tallerucc.pages.composables.PostCard
+import com.example.tallerucc.utils.formatTimestamp
 import com.example.tallerucc.viewModel.CommunityViewModel
 import com.example.tallerucc.viewModel.NavigationViewModel
 import com.example.tallerucc.viewModel.NotificationViewModel
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -129,11 +131,17 @@ fun CommunityDetailsPage(
                         isCommunityOfficial(communityName.toString())
                     } ?: false
 
+                    val createdAt = post["createdAt"] as? Timestamp
+
+                    // Formatear la fecha
+                    val formattedDate = formatTimestamp(createdAt)
+
                     PostCard(
                         post = post,
                         userId = currentUser?.uid ?: "",
                         isLiked = isLiked,
-                        isCommunityOfficial = isCommunityOfficial
+                        isCommunityOfficial = isCommunityOfficial,
+                        createdAt = formattedDate, // Pasa la fecha formateada
                     ) { postId, isNowLiked ->
                         if (currentUser != null) {
                             communityViewModel.toggleLike(postId, currentUser.uid, isNowLiked)
@@ -152,3 +160,4 @@ fun CommunityDetailsPage(
 
 }
 
+//
